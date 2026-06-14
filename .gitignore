@@ -1,0 +1,77 @@
+# =====================
+# Backend - Django
+# =====================
+venv/
+venv.bak/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+*.log
+
+# =====================
+# Frontend - Angular
+# =====================
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.env
+frontend/*.log
+frontend/.vscode/
+frontend/coverage/
+
+# =====================
+# Général
+# =====================
+*.env
+.env.*
+*.swp
+*.swo
+.idea/
+.vscode/
+*.DS_Store
+Thumbs.db
+
+
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
