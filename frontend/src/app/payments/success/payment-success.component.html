@@ -1,0 +1,20 @@
+<div class="payment-page">
+  <div class="payment-card" *ngIf="!isLoading">
+    <div *ngIf="isVerified && !errorMessage">
+      <div class="success-icon"><fa-icon [icon]="faCheckCircle"></fa-icon></div>
+      <h2>Paiement réussi !</h2>
+      <p>Votre paiement a été effectué avec succès. Le prestataire en a été notifié.</p>
+      <button class="btn btn-primary" routerLink="/dashboard">Retour au Tableau de Bord</button>
+    </div>
+    <div *ngIf="!isVerified || errorMessage">
+      <div class="warning-icon"><fa-icon [icon]="faExclamationTriangle"></fa-icon></div>
+      <h2>Vérification en cours</h2>
+      <p>{{ errorMessage || 'Nous vérifions votre paiement. Vous pouvez revenir plus tard.' }}</p>
+      <button class="btn btn-primary" routerLink="/dashboard">Retour au Tableau de Bord</button>
+    </div>
+  </div>
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Vérification du paiement...</p>
+  </div>
+</div>

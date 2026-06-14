@@ -1,0 +1,51 @@
+<main>
+  <section class="hero" style="background-image: linear-gradient(rgba(0, 31, 63, 0.7), rgba(0, 31, 63, 0.7)), url('assets/images/hero.png');">
+    <div class="container hero-content">
+      <h1>Entretien automobile simplifié à <span class="highlight">Madagascar</span></h1>
+      <p>Trouvez les meilleurs garages, mécaniciens et dépanneurs près de chez vous en un clic.</p>
+      <div class="hero-btns">
+        <button class="btn btn-primary" routerLink="/providers">Prendre rendez-vous</button>
+        <button class="btn btn-outline" style="border-color: white; color: white;" routerLink="/register">Devenir Prestataire</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="features container">
+    <div class="section-title">
+      <h2>Nos Services</h2>
+      <p>Tout ce dont vous avez besoin pour votre véhicule.</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="icon"><fa-icon [icon]="faSearch"></fa-icon></div>
+        <h3>Recherche Rapide</h3>
+        <p>Filtrez par ville, spécialité et disponibilité.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon"><fa-icon [icon]="faCalendarAlt"></fa-icon></div>
+        <h3>Prise de RDV</h3>
+        <p>Réservez votre créneau en quelques secondes.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon"><fa-icon [icon]="faComments"></fa-icon></div>
+        <h3>Messagerie</h3>
+        <p>Communiquez directement avec votre prestataire.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon"><fa-icon [icon]="faCreditCard"></fa-icon></div>
+        <h3>Paiement Sécurisé</h3>
+        <p>Réglez vos factures via Stripe en toute sécurité.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-banner">
+    <div class="container cta-flex">
+      <div class="cta-text">
+        <h2>Vous êtes un professionnel ?</h2>
+        <p>Rejoignez la plateforme AutoFixMG et développez votre clientèle.</p>
+      </div>
+      <button class="btn btn-primary" routerLink="/register">S'inscrire comme Prestataire</button>
+    </div>
+  </section>
+</main>

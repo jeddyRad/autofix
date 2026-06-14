@@ -1,0 +1,32 @@
+<header class="header">
+  <div class="container nav-flex">
+    <div class="logo" routerLink="/">
+      <span class="logo-text" style="cursor: pointer;">AutoFix<span class="highlight">MG</span></span>
+    </div>
+    <nav class="nav">
+      <ul>
+        <li><a routerLink="/" title="Accueil"><fa-icon [icon]="faHome" class="nav-icon"></fa-icon> <span class="nav-text">Accueil</span></a></li>
+        <li><a routerLink="/providers" title="Prestataires"><fa-icon [icon]="faTools" class="nav-icon"></fa-icon> <span class="nav-text">Prestataires</span></a></li>
+        <ng-container *ngIf="authService.isLoggedIn(); else anonymousTpl">
+          <li><a routerLink="/dashboard" title="Tableau de bord"><fa-icon [icon]="faClipboardList" class="nav-icon"></fa-icon> <span class="nav-text">Tableau de bord</span></a></li>
+          <li><a routerLink="/profile" title="Profil"><fa-icon [icon]="faUser" class="nav-icon"></fa-icon> <span class="nav-text">Profil</span></a></li>
+          <li><a routerLink="/chat" title="Messagerie"><fa-icon [icon]="faCommentDots" class="nav-icon"></fa-icon> <span class="nav-text">Messagerie</span></a></li>
+          <li>
+            <button class="btn btn-outline nav-btn" (click)="logout()" title="Déconnexion"><fa-icon [icon]="faSignOutAlt" class="nav-icon"></fa-icon> <span class="nav-text">Déconnexion</span></button>
+          </li>
+        </ng-container>
+        <ng-template #anonymousTpl>
+          <li><button class="btn btn-primary nav-btn" routerLink="/login" title="Connexion"><fa-icon [icon]="faSignInAlt" class="nav-icon"></fa-icon> <span class="nav-text">Connexion</span></button></li>
+        </ng-template>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<router-outlet></router-outlet>
+
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2026 AutoFixMG. Tous droits réservés.</p>
+  </div>
+</footer>

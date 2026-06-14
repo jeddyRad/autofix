@@ -1,0 +1,72 @@
+<div class="chat-page">
+  <!-- Sidebar: Conversation list -->
+  <div class="chat-sidebar">
+    <div class="sidebar-header">
+      <h2>Messagerie</h2>
+    </div>
+
+    <div *ngIf="isLoading" class="sidebar-loading">
+      <div class="spinner-small"></div>
+    </div>
+
+    <div *ngIf="!isLoading && conversations.length === 0" class="sidebar-empty">
+      <p>Aucune conversation.</p>
+      <p class="hint">Les discussions avec les prestataires apparaîtront ici.</p>
+    </div>
+
+    <div class="conversation-list">
+      <div *ngFor="let conv of conversations"
+           class="conversation-item"
+           [class.active]="selectedPartner?.id === conv.partner?.id"
+           (click)="selectPartner(conv)">
+        <div class="conv-avatar">{{ (conv.partner?.first_name || '?')[0] }}</div>
+        <div class="conv-info">
+          <span class="conv-name">{{ conv.partner?.first_name }} {{ conv.partner?.last_name }}</span>
+          <span class="conv-preview">{{ conv.last_message?.content }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main: Messages -->
+  <div class="chat-main">
+    <div *ngIf="!selectedPartner" class="chat-empty">
+      <span class="chat-empty-icon"><fa-icon [icon]="faCommentDots"></fa-icon></span>
+      <h3>Sélectionnez une conversation</h3>
+      <p>Choisissez un contact dans la liste pour commencer à discuter.</p>
+    </div>
+
+    <ng-container *ngIf="selectedPartner">
+      <div class="chat-header">
+        <div class="chat-partner-info">
+          <div class="partner-avatar">{{ (selectedPartner?.first_name || '?')[0] }}</div>
+          <span class="partner-name">{{ selectedPartner?.first_name }} {{ selectedPartner?.last_name }}</span>
+        </div>
+      </div>
+
+      <div class="messages-container" #messagesContainer>
+        <div *ngIf="messages.length === 0" class="messages-empty">
+          <p>Aucun message pour le moment. Envoyez le premier !</p>
+        </div>
+        <div *ngFor="let msg of messages"
+             class="message-bubble"
+             [class.own]="isOwnMessage(msg)"
+             [class.other]="!isOwnMessage(msg)">
+          <div class="bubble-content">{{ msg.content }}</div>
+          <div class="bubble-time">{{ msg.timestamp | date:'HH:mm' }}</div>
+        </div>
+      </div>
+
+      <div class="chat-input-bar">
+        <textarea
+          [(ngModel)]="newMessage"
+          placeholder="Écrire un message..."
+          rows="1"
+          (keydown)="onKeyDown($event)"></textarea>
+        <button class="btn btn-primary send-btn" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+          Envoyer
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</div>

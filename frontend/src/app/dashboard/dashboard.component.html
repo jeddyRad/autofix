@@ -1,0 +1,215 @@
+<div class="dashboard-page container">
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div>
+      <h1>Tableau de bord</h1>
+      <p class="subtitle">Bienvenue, {{ user?.first_name }} {{ user?.last_name }}
+        <span class="role-badge" [ngClass]="role">{{ role === 'ADMIN' ? 'Administrateur' : (role === 'PROVIDER' ? 'Prestataire' : 'Client') }}</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon pending"><fa-icon [icon]="faClipboardList"></fa-icon></div>
+      <div class="stat-info">
+        <span class="stat-number">{{ pendingAppointments.length }}</span>
+        <span class="stat-label">En attente</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon accepted"><fa-icon [icon]="faCheckCircle"></fa-icon></div>
+      <div class="stat-info">
+        <span class="stat-number">{{ activeAppointments.length }}</span>
+        <span class="stat-label">Acceptés</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon completed"><fa-icon [icon]="faTrophy"></fa-icon></div>
+      <div class="stat-info">
+        <span class="stat-number">{{ completedAppointments.length }}</span>
+        <span class="stat-label">Terminés</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon cancelled"><fa-icon [icon]="faTimesCircle"></fa-icon></div>
+      <div class="stat-info">
+        <span class="stat-number">{{ cancelledAppointments.length }}</span>
+        <span class="stat-label">Annulés</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button [class.active]="activeTab === 'appointments'" (click)="activeTab = 'appointments'">Rendez-vous</button>
+    <button [class.active]="activeTab === 'completed'" (click)="activeTab = 'completed'">Historique</button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <!-- Appointments Tab -->
+  <div *ngIf="!isLoading && activeTab === 'appointments'">
+    <!-- Pending Appointments -->
+    <div *ngIf="pendingAppointments.length > 0" class="section">
+      <h2 class="section-title"><fa-icon [icon]="faClipboardList"></fa-icon> En attente ({{ pendingAppointments.length }})</h2>
+      <div class="appointments-list">
+        <div *ngFor="let apt of pendingAppointments" class="appointment-card">
+          <div class="apt-header">
+            <span class="status-badge PENDING">En attente</span>
+            <span class="apt-date">{{ apt.date }} · {{ apt.time_slot }}</span>
+          </div>
+          <div class="apt-body">
+            <p class="apt-vehicle"><strong>Véhicule :</strong> {{ apt.vehicle_info }}</p>
+            <p class="apt-desc"><strong>Problème :</strong> {{ apt.problem_description }}</p>
+            <p *ngIf="role === 'CLIENT' || role === 'ADMIN'">
+              <strong>Prestataire :</strong> {{ apt.provider_detail?.first_name }} {{ apt.provider_detail?.last_name }}
+            </p>
+            <p *ngIf="role === 'PROVIDER' || role === 'ADMIN'">
+              <strong>Client :</strong> {{ apt.client_detail?.first_name }} {{ apt.client_detail?.last_name }}
+            </p>
+          </div>
+          <div class="apt-actions">
+            <ng-container *ngIf="role === 'PROVIDER' || role === 'ADMIN'">
+              <button class="btn btn-primary btn-sm" (click)="openAction(apt, 'accept')"><fa-icon [icon]="faCheckCircle"></fa-icon> Accepter</button>
+              <button class="btn btn-danger btn-sm" (click)="cancelAppointment(apt.id)"><fa-icon [icon]="faTimesCircle"></fa-icon> Refuser</button>
+            </ng-container>
+            <ng-container *ngIf="role === 'CLIENT'">
+              <button class="btn btn-danger btn-sm" (click)="cancelAppointment(apt.id)">Annuler</button>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active/Accepted Appointments -->
+    <div *ngIf="activeAppointments.length > 0" class="section">
+      <h2 class="section-title"><fa-icon [icon]="faCheckCircle"></fa-icon> Acceptés ({{ activeAppointments.length }})</h2>
+      <div class="appointments-list">
+        <div *ngFor="let apt of activeAppointments" class="appointment-card">
+          <div class="apt-header">
+            <span class="status-badge ACCEPTED">Accepté</span>
+            <span class="apt-date">{{ apt.date }} · {{ apt.time_slot }}</span>
+          </div>
+          <div class="apt-body">
+            <p class="apt-vehicle"><strong>Véhicule :</strong> {{ apt.vehicle_info }}</p>
+            <p class="apt-desc"><strong>Problème :</strong> {{ apt.problem_description }}</p>
+            <p><strong>Prix :</strong> {{ apt.price }} €</p>
+            <p><strong>Paiement :</strong>
+              <span class="payment-badge" [ngClass]="apt.payment_status">{{ getPaymentLabel(apt.payment_status) }}</span>
+            </p>
+            <p *ngIf="role === 'CLIENT' || role === 'ADMIN'">
+              <strong>Prestataire :</strong> {{ apt.provider_detail?.first_name }} {{ apt.provider_detail?.last_name }}
+            </p>
+            <p *ngIf="role === 'PROVIDER' || role === 'ADMIN'">
+              <strong>Client :</strong> {{ apt.client_detail?.first_name }} {{ apt.client_detail?.last_name }}
+            </p>
+          </div>
+          <div class="apt-actions">
+            <ng-container *ngIf="role === 'CLIENT' && apt.payment_status === 'UNPAID'">
+              <button class="btn btn-primary btn-sm" (click)="payAppointment(apt)"><fa-icon [icon]="faCreditCard"></fa-icon> Payer ({{ apt.price }} €)</button>
+            </ng-container>
+            <ng-container *ngIf="role === 'PROVIDER' || role === 'ADMIN'">
+              <button class="btn btn-primary btn-sm" (click)="completeAppointment(apt.id)"><fa-icon [icon]="faTrophy"></fa-icon> Marquer Terminé</button>
+            </ng-container>
+            <button class="btn btn-danger btn-sm" (click)="cancelAppointment(apt.id)">Annuler</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="pendingAppointments.length === 0 && activeAppointments.length === 0" class="empty-state">
+      <span class="empty-icon"><fa-icon [icon]="faCalendarAlt"></fa-icon></span>
+      <h3>Aucun rendez-vous actif</h3>
+      <p *ngIf="role === 'CLIENT'">Recherchez un prestataire et prenez un rendez-vous.</p>
+      <p *ngIf="role === 'PROVIDER'">Les demandes de rendez-vous des clients apparaîtront ici.</p>
+      <button *ngIf="role === 'CLIENT'" class="btn btn-primary" routerLink="/providers">Trouver un prestataire</button>
+    </div>
+  </div>
+
+  <!-- History Tab -->
+  <div *ngIf="!isLoading && activeTab === 'completed'">
+    <div *ngIf="completedAppointments.length + cancelledAppointments.length > 0" class="appointments-list">
+      <div *ngFor="let apt of completedAppointments" class="appointment-card">
+        <div class="apt-header">
+          <span class="status-badge COMPLETED">Terminé</span>
+          <span class="apt-date">{{ apt.date }} · {{ apt.time_slot }}</span>
+        </div>
+        <div class="apt-body">
+          <p><strong>Véhicule :</strong> {{ apt.vehicle_info }}</p>
+          <p><strong>Prix :</strong> {{ apt.price }} €</p>
+          <p><strong>Paiement :</strong>
+            <span class="payment-badge" [ngClass]="apt.payment_status">{{ getPaymentLabel(apt.payment_status) }}</span>
+          </p>
+        </div>
+        <div class="apt-actions" *ngIf="role === 'CLIENT' && !apt.review_detail">
+          <button class="btn btn-outline btn-sm" (click)="openReview(apt)"><fa-icon [icon]="faStar"></fa-icon> Laisser un avis</button>
+        </div>
+        <div *ngIf="apt.review_detail" class="review-display">
+          <p><strong>Votre avis :</strong> {{ apt.review_detail.rating }}/5 — {{ apt.review_detail.comment }}</p>
+        </div>
+      </div>
+      <div *ngFor="let apt of cancelledAppointments" class="appointment-card cancelled">
+        <div class="apt-header">
+          <span class="status-badge CANCELLED">Annulé</span>
+          <span class="apt-date">{{ apt.date }} · {{ apt.time_slot }}</span>
+        </div>
+        <div class="apt-body">
+          <p><strong>Véhicule :</strong> {{ apt.vehicle_info }}</p>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="completedAppointments.length + cancelledAppointments.length === 0" class="empty-state">
+      <span class="empty-icon">📜</span>
+      <h3>Aucun historique</h3>
+      <p>Les rendez-vous terminés et annulés apparaîtront ici.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Accept Modal -->
+<div *ngIf="actionAppointment && actionType === 'accept'" class="modal-overlay" (click)="closeAction()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h3>Accepter le rendez-vous</h3>
+    <p>Définissez le prix pour cette intervention :</p>
+    <div class="form-group">
+      <label>Prix (€)</label>
+      <input type="number" [(ngModel)]="priceInput" min="0" step="0.01">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" (click)="closeAction()">Annuler</button>
+      <button class="btn btn-primary" (click)="acceptAppointment()">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Review Modal -->
+<div *ngIf="reviewAppointment" class="modal-overlay" (click)="closeReview()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h3>Laisser un avis</h3>
+    <div class="form-group">
+      <label>Note (1-5)</label>
+      <select [(ngModel)]="reviewRating">
+        <option [value]="1">1 - Mauvais</option>
+        <option [value]="2">2 - Moyen</option>
+        <option [value]="3">3 - Bien</option>
+        <option [value]="4">4 - Très bien</option>
+        <option [value]="5">5 - Excellent</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Commentaire</label>
+      <textarea [(ngModel)]="reviewComment" rows="3" placeholder="Décrivez votre expérience..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" (click)="closeReview()">Annuler</button>
+      <button class="btn btn-primary" (click)="submitReview()">Envoyer l'avis</button>
+    </div>
+  </div>
+</div>

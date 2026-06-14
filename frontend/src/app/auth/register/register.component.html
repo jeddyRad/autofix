@@ -1,0 +1,125 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Créer un compte</h2>
+      <p>Rejoignez la communauté AutoFixMG</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="error-banner">
+      {{ errorMessage }}
+    </div>
+
+    <form class="auth-form" (ngSubmit)="verifyOtp()" *ngIf="showOtpForm">
+      <div class="form-group">
+        <label for="otpCode">Code de validation (reçu par email)</label>
+        <input type="text" id="otpCode" name="otpCode" [(ngModel)]="otpCode" placeholder="123456" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="isLoading">
+        {{ isLoading ? 'Vérification...' : "Valider l'inscription" }}
+      </button>
+    </form>
+
+    <form class="auth-form" (ngSubmit)="onSubmit()" *ngIf="!showOtpForm">
+      <!-- Role Selection -->
+      <div class="role-selection">
+        <label class="role-card" [class.active]="role === 'CLIENT'">
+          <input type="radio" name="role" value="CLIENT" [(ngModel)]="role" style="display:none;">
+          <div class="role-content">
+            <span class="icon"><fa-icon [icon]="faCar"></fa-icon></span>
+            <span>Client</span>
+          </div>
+        </label>
+        <label class="role-card" [class.active]="role === 'PROVIDER'">
+          <input type="radio" name="role" value="PROVIDER" [(ngModel)]="role" style="display:none;">
+          <div class="role-content">
+            <span class="icon"><fa-icon [icon]="faWrench"></fa-icon></span>
+            <span>Prestataire</span>
+          </div>
+        </label>
+      </div>
+
+      <!-- General User Fields -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="first_name">Prénom *</label>
+          <input type="text" id="first_name" name="first_name" [(ngModel)]="first_name" placeholder="Jean" required>
+        </div>
+        <div class="form-group">
+          <label for="last_name">Nom *</label>
+          <input type="text" id="last_name" name="last_name" [(ngModel)]="last_name" placeholder="Dupont" required>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input type="email" id="email" name="email" [(ngModel)]="email" placeholder="votre@email.com" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Mot de passe *</label>
+        <input type="password" id="password" name="password" [(ngModel)]="password" placeholder="••••••••" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone">Téléphone</label>
+          <input type="text" id="phone" name="phone" [(ngModel)]="phone" placeholder="+261 34 ...">
+        </div>
+        <div class="form-group">
+          <label for="city">Ville</label>
+          <input type="text" id="city" name="city" [(ngModel)]="city" placeholder="Ex: Antananarivo">
+        </div>
+      </div>
+
+      <!-- Specific Provider Fields (dynamic display) -->
+      <div *ngIf="role === 'PROVIDER'" class="provider-fields">
+        <hr class="divider">
+        <h3 class="section-subtitle">Détails professionnels</h3>
+
+        <div class="form-group">
+          <label for="business_name">Nom du commerce / Garage *</label>
+          <input type="text" id="business_name" name="business_name" [(ngModel)]="business_name" placeholder="Garage Auto Premium" required>
+        </div>
+
+        <div class="form-group">
+          <label for="address">Adresse complète *</label>
+          <input type="text" id="address" name="address" [(ngModel)]="address" placeholder="Lot IVB 42, Analakely" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="specialty">Spécialité</label>
+            <select id="specialty" name="specialty" [(ngModel)]="specialty" class="form-control">
+              <option value="MECANICIEN">Mécanicien</option>
+              <option value="DEPANNAGE">Dépannage / Remorquage</option>
+              <option value="GARAGE">Garage complet</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="experience_years">Années d'expérience</label>
+            <input type="number" id="experience_years" name="experience_years" [(ngModel)]="experience_years" min="0">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="price_rate">Tarif moyen estimé (€)</label>
+          <input type="number" id="price_rate" name="price_rate" [(ngModel)]="price_rate" min="0">
+        </div>
+
+        <div class="form-group">
+          <label for="bio">Biographie / Description de vos services</label>
+          <textarea id="bio" name="bio" [(ngModel)]="bio" rows="3" placeholder="Présentez votre entreprise..."></textarea>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="isLoading">
+        {{ isLoading ? 'Inscription en cours...' : "S'inscrire" }}
+      </button>
+    </form>
+    
+    <div class="auth-footer">
+      <p>Déjà un compte ? <a routerLink="/login">Se connecter</a></p>
+      <a routerLink="/" class="back-link">← Retour à l'accueil</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+﻿.payment-page {
+  min-height: calc(100vh - 160px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.payment-card {
+  background: var(--white);
+  padding: 3rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  max-width: 520px;
+  width: 100%;
+}
+
+.cancel-icon {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff4e5;
+  color: var(--primary-dark);
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.payment-card h2 {
+  font-size: 1.75rem;
+  color: var(--secondary);
+  margin-bottom: 1rem;
+}
+
+.payment-card p {
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.payment-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
