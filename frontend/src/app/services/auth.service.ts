@@ -5,13 +5,14 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { API_BASE_URL } from '../config/api.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   // Base URL pointing to the Django backend's authentication endpoints
-  private apiUrl = 'http://localhost:8000/api/auth';
+  private apiUrl = `${API_BASE_URL}/api/auth`;
 
   // Using Angular signals for reactive state to hold current user information
   currentUser = signal<any>(null);

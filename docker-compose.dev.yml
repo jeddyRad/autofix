@@ -1,0 +1,17 @@
+services:
+  backend:
+    volumes:
+      - ./backend:/app
+    environment:
+      DJANGO_RUNSERVER: "true"
+    entrypoint: ["sh", "./entrypoint.sh"]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports: !reset
+      - "4200:4200"

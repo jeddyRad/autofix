@@ -31,6 +31,7 @@ frontend/coverage/
 # =====================
 *.env
 .env.*
+!.env.example
 *.swp
 *.swo
 .idea/
