@@ -43,3 +43,32 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Avis {self.id} - Note: {self.rating}/5 pour {self.provider.email}"
+
+
+class Availability(models.Model):
+    """Weekly availability slots defined by providers."""
+    WEEKDAY_CHOICES = (
+        (0, 'Lundi'),
+        (1, 'Mardi'),
+        (2, 'Mercredi'),
+        (3, 'Jeudi'),
+        (4, 'Vendredi'),
+        (5, 'Samedi'),
+        (6, 'Dimanche'),
+    )
+
+    provider = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='availabilities',
+        limit_choices_to={'role': 'PROVIDER'}
+    )
+    weekday = models.IntegerField(choices=WEEKDAY_CHOICES)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    is_available = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['weekday', 'start_time']
+        unique_together = ['provider', 'weekday', 'start_time']
+
+    def __str__(self):
+        return f"{self.provider.email} – {self.get_weekday_display()} {self.start_time}-{self.end_time}"

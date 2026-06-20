@@ -1,15 +1,33 @@
-﻿import stripe
+﻿import csv
+import stripe
+import logging
 from django.conf import settings
+from django.core.mail import send_mail
+from django.http import HttpResponse
 from rest_framework import viewsets, status, generics, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Appointment, Review
-from .serializers import AppointmentSerializer, ReviewSerializer
+from .models import Appointment, Review, Availability
+from .serializers import AppointmentSerializer, ReviewSerializer, AvailabilitySerializer
 from accounts.models import ProviderProfile
 from django.db.models import Avg
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+logger = logging.getLogger(__name__)
+
+
+# ─── Email Helpers ────────────────────────────────────────────────────────────
+
+def _notify_appointment(subject: str, body: str, *recipients):
+    """Send notification email to one or more recipients, failing silently."""
+    emails = [e for e in recipients if e]
+    if not emails:
+        return
+    try:
+        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, emails, fail_silently=False)
+    except Exception as exc:
+        logger.error('[Notification] Envoi email échoué : %s', exc)
 
 
 # ─── Permission helpers ────────────────────────────────────────────────────────
@@ -27,11 +45,25 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if _is_admin(user):
-            return Appointment.objects.all().order_by('-date')
+            qs = Appointment.objects.all()
         elif user.role == 'PROVIDER':
-            return Appointment.objects.filter(provider=user).order_by('-date')
+            qs = Appointment.objects.filter(provider=user)
         else:
-            return Appointment.objects.filter(client=user).order_by('-date')
+            qs = Appointment.objects.filter(client=user)
+
+        # Optional filters
+        status_filter = self.request.query_params.get('status')
+        date_from = self.request.query_params.get('date_from')
+        date_to = self.request.query_params.get('date_to')
+
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        if date_from:
+            qs = qs.filter(date__gte=date_from)
+        if date_to:
+            qs = qs.filter(date__lte=date_to)
+
+        return qs.order_by('-date')
 
     def perform_create(self, serializer):
         serializer.save(client=self.request.user, status='PENDING')
@@ -57,6 +89,38 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data)
 
+    # ── CSV Export ───────────────────────────────────────────────────────────
+
+    @action(detail=False, methods=['get'], url_path='export')
+    def export_csv(self, request):
+        """GET /api/appointments/export/ — Download appointments as CSV."""
+        qs = self.get_queryset()
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="historique-interventions.csv"'
+        response.write('\ufeff')  # UTF-8 BOM for Excel compatibility
+
+        writer = csv.writer(response, delimiter=';')
+        writer.writerow([
+            'ID', 'Date', 'Créneau', 'Statut', 'Paiement',
+            'Client', 'Prestataire', 'Véhicule', 'Problème', 'Prix (€)'
+        ])
+
+        for apt in qs:
+            writer.writerow([
+                str(apt.id),
+                str(apt.date),
+                apt.time_slot,
+                apt.get_status_display(),
+                apt.get_payment_status_display(),
+                f"{apt.client.first_name} {apt.client.last_name}",
+                f"{apt.provider.first_name} {apt.provider.last_name}",
+                apt.vehicle_info,
+                apt.problem_description,
+                str(apt.price),
+            ])
+
+        return response
+
     # ── Status transition actions ────────────────────────────────────────────
 
     @action(detail=True, methods=['post'])
@@ -78,11 +142,38 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
         appointment.status = 'ACCEPTED'
         appointment.save()
+
+        # ── Email notification ──
+        provider_name = f"{appointment.provider.first_name} {appointment.provider.last_name}"
+        client_name = f"{appointment.client.first_name} {appointment.client.last_name}"
+        _notify_appointment(
+            f"✅ Votre rendez-vous du {appointment.date} a été accepté – AutoFix MG",
+            (
+                f"Bonjour {client_name},\n\n"
+                f"Votre rendez-vous du {appointment.date} ({appointment.time_slot}) "
+                f"avec {provider_name} a été accepté.\n"
+                f"Prix convenu : {appointment.price} €\n\n"
+                "Connectez-vous pour procéder au paiement.\n\nAutoFix MG"
+            ),
+            appointment.client.email,
+        )
+        _notify_appointment(
+            f"📋 Nouveau rendez-vous confirmé le {appointment.date} – AutoFix MG",
+            (
+                f"Bonjour {provider_name},\n\n"
+                f"Vous avez accepté le rendez-vous de {client_name} "
+                f"pour le {appointment.date} ({appointment.time_slot}).\n"
+                f"Véhicule : {appointment.vehicle_info}\n"
+                f"Problème : {appointment.problem_description}\n\nAutoFix MG"
+            ),
+            appointment.provider.email,
+        )
+
         return Response(AppointmentSerializer(appointment).data)
 
     @action(detail=True, methods=['post'])
     def start(self, request, pk=None):
-        """Provider marks an ACCEPTED appointment as IN_PROGRESS (intervention started)."""
+        """Provider marks an ACCEPTED appointment as IN_PROGRESS."""
         appointment = self.get_object()
         if appointment.provider != request.user and not _is_admin(request.user):
             return Response({'detail': 'Non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
@@ -104,6 +195,21 @@ class AppointmentViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
         appointment.status = 'COMPLETED'
         appointment.save()
+
+        # ── Email notification ──
+        client_name = f"{appointment.client.first_name} {appointment.client.last_name}"
+        provider_name = f"{appointment.provider.first_name} {appointment.provider.last_name}"
+        _notify_appointment(
+            f"🏁 Votre intervention du {appointment.date} est terminée – AutoFix MG",
+            (
+                f"Bonjour {client_name},\n\n"
+                f"L'intervention de {provider_name} du {appointment.date} est maintenant clôturée.\n"
+                f"Montant payé : {appointment.price} €\n\n"
+                "N'hésitez pas à laisser un avis sur la prestation.\n\nAutoFix MG"
+            ),
+            appointment.client.email,
+        )
+
         return Response(AppointmentSerializer(appointment).data)
 
     @action(detail=True, methods=['post'])
@@ -121,6 +227,20 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             )
         appointment.status = 'CANCELLED'
         appointment.save()
+
+        # ── Email notification ──
+        cancelled_by = f"{user.first_name} {user.last_name}"
+        _notify_appointment(
+            f"❌ Rendez-vous du {appointment.date} annulé – AutoFix MG",
+            (
+                f"Bonjour,\n\n"
+                f"Le rendez-vous du {appointment.date} ({appointment.time_slot}) "
+                f"a été annulé par {cancelled_by}.\n\nAutoFix MG"
+            ),
+            appointment.client.email,
+            appointment.provider.email,
+        )
+
         return Response(AppointmentSerializer(appointment).data)
 
 
@@ -162,6 +282,44 @@ class ReviewViewSet(viewsets.ModelViewSet):
             profile, _ = ProviderProfile.objects.get_or_create(user=provider)
             profile.rating = round(avg_rating, 1)
             profile.save()
+
+
+# ─── Availability ViewSet ─────────────────────────────────────────────────────
+
+class AvailabilityViewSet(viewsets.ModelViewSet):
+    """
+    CRUD for provider weekly availability slots.
+    GET /api/availability/?provider=<id>  — list all slots (public)
+    POST /api/availability/               — create a slot (PROVIDER only)
+    DELETE /api/availability/<id>/        — delete a slot (PROVIDER only)
+    """
+    serializer_class = AvailabilitySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        provider_id = self.request.query_params.get('provider')
+        if provider_id:
+            return Availability.objects.filter(provider_id=provider_id)
+        user = self.request.user
+        if user.role == 'PROVIDER':
+            return Availability.objects.filter(provider=user)
+        if user.role == 'ADMIN':
+            return Availability.objects.all()
+        # Clients: must specify a provider_id
+        return Availability.objects.none()
+
+    def perform_create(self, serializer):
+        if self.request.user.role != 'PROVIDER':
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Seuls les prestataires peuvent gérer leurs disponibilités.")
+        serializer.save(provider=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.provider != request.user and not _is_admin(request.user):
+            return Response({'detail': 'Non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # ─── Stripe Payment Views ──────────────────────────────────────────────────────
@@ -221,7 +379,6 @@ class CreateStripeSessionView(generics.CreateAPIView):
                     'quantity': 1,
                 }],
                 mode='payment',
-                # {CHECKOUT_SESSION_ID} is a Stripe template literal — must stay as-is
                 success_url=(
                     f"{settings.FRONTEND_URL}/payment/success"
                     f"?session_id={{CHECKOUT_SESSION_ID}}&appointment_id={appointment.id}"

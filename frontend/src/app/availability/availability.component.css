@@ -1,0 +1,104 @@
+.dashboard-page {
+    padding: 2rem 1rem;
+}
+
+.dashboard-header {
+    margin-bottom: 1.5rem;
+}
+
+.card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-group select,
+.form-group input[type="time"] {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.align-end {
+    justify-content: flex-end;
+}
+
+.week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.75rem;
+}
+
+.day-column {
+    background: #f5f7fa;
+    border-radius: 10px;
+    padding: 0.75rem;
+    min-height: 120px;
+}
+
+.day-header {
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #1a73e8;
+}
+
+.slot-card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: #c5221f;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.no-slot {
+    text-align: center;
+    color: #aaa;
+    font-size: 0.85rem;
+}
+
+.error-msg {
+    color: #c5221f;
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .week-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

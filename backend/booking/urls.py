@@ -1,10 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import AppointmentViewSet, ReviewViewSet, CreateStripeSessionView, VerifyPaymentView
+from .views import AppointmentViewSet, ReviewViewSet, AvailabilityViewSet, CreateStripeSessionView, VerifyPaymentView
 
 router = DefaultRouter()
 router.register('appointments', AppointmentViewSet, basename='appointment')
 router.register('reviews', ReviewViewSet, basename='review')
+router.register('availability', AvailabilityViewSet, basename='availability')
 
 urlpatterns = [
     path('', include(router.urls)),

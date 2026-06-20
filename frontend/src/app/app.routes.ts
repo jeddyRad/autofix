@@ -13,6 +13,8 @@ import { authGuard } from './guards/auth.guard';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 import { AdminDashboardComponent } from './admin/admin-dashboard.component';
+import { HistoryComponent } from './history/history.component';
+import { AvailabilityComponent } from './availability/availability.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -22,6 +24,8 @@ export const routes: Routes = [
   { path: 'admin', component: AdminDashboardComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'chat', component: ChatComponent, canActivate: [authGuard] },
+  { path: 'history', component: HistoryComponent, canActivate: [authGuard] },
+  { path: 'availability', component: AvailabilityComponent, canActivate: [authGuard] },
   { path: 'payment/success', component: PaymentSuccessComponent, canActivate: [authGuard] },
   { path: 'payment/cancel', component: PaymentCancelComponent, canActivate: [authGuard] },
   { path: 'login', component: LoginComponent },

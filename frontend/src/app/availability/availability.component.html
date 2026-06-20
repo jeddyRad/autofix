@@ -1,0 +1,48 @@
+<div class="dashboard-page container">
+    <div class="dashboard-header">
+        <div>
+            <h1>Mes Disponibilités</h1>
+            <p class="subtitle">Définissez vos créneaux hebdomadaires récurrents.</p>
+        </div>
+    </div>
+
+    <!-- Add Form -->
+    <div class="card add-form">
+        <h3>Ajouter un créneau</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Jour de la semaine</label>
+                <select [(ngModel)]="newSlot.weekday">
+                    <option *ngFor="let d of WEEKDAYS" [value]="d.value">{{ d.label }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Heure de début</label>
+                <input type="time" [(ngModel)]="newSlot.start_time">
+            </div>
+            <div class="form-group">
+                <label>Heure de fin</label>
+                <input type="time" [(ngModel)]="newSlot.end_time">
+            </div>
+            <div class="form-group align-end">
+                <button class="btn btn-primary" (click)="addSlot()">+ Ajouter</button>
+            </div>
+        </div>
+        <p *ngIf="errorMessage" class="error-msg">{{ errorMessage }}</p>
+    </div>
+
+    <!-- Weekly Grid -->
+    <div *ngIf="isLoading" class="loading-container">
+        <div class="spinner"></div>
+    </div>
+    <div *ngIf="!isLoading" class="week-grid">
+        <div *ngFor="let day of WEEKDAYS" class="day-column">
+            <div class="day-header">{{ day.label }}</div>
+            <div *ngFor="let slot of slotsByDay(day.value)" class="slot-card">
+                <span>{{ slot.start_time }} – {{ slot.end_time }}</span>
+                <button class="btn-remove" (click)="deleteSlot(slot.id)">✕</button>
+            </div>
+            <div *ngIf="slotsByDay(day.value).length === 0" class="no-slot">—</div>
+        </div>
+    </div>
+</div>

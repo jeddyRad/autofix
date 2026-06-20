@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faHome, faTools, faClipboardList, faUser, faCommentDots, faSignOutAlt, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
+import { ToastComponent } from './shared/toast.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, CommonModule, FontAwesomeModule],
+  imports: [RouterOutlet, RouterLink, CommonModule, FontAwesomeModule, ToastComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

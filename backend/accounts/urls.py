@@ -10,6 +10,7 @@ from .views import (
     ForgotPasswordView, ResetPasswordView,
     DeleteAccountView,
     AdminProviderVerifyView,
+    ProviderStatsView,
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -43,4 +44,8 @@ urlpatterns = [
     # ── Admin Actions ────────────────────────────────────────────────────────────
     # POST: ADMIN only → validates a provider's account
     path('admin/providers/<uuid:provider_id>/verify/', AdminProviderVerifyView.as_view(), name='admin_verify_provider'),
+
+    # ── Provider Stats ────────────────────────────────────────────────────────────
+    # GET: revenue, nb_completed, average_rating for authenticated PROVIDER
+    path('provider/stats/', ProviderStatsView.as_view(), name='provider_stats'),
 ]

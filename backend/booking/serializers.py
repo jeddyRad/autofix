@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Appointment, Review
+from .models import Appointment, Review, Availability
 from django.contrib.auth import get_user_model
 from accounts.serializers import UserSerializer
 
@@ -30,3 +30,12 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at', 'client_detail', 'provider_detail', 'review_detail'
         )
         read_only_fields = ('client', 'payment_status', 'stripe_session_id', 'client_detail', 'provider_detail', 'review_detail')
+
+
+class AvailabilitySerializer(serializers.ModelSerializer):
+    weekday_label = serializers.CharField(source='get_weekday_display', read_only=True)
+
+    class Meta:
+        model = Availability
+        fields = ('id', 'provider', 'weekday', 'weekday_label', 'start_time', 'end_time', 'is_available')
+        read_only_fields = ('provider', 'weekday_label')

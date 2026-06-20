@@ -1,0 +1,68 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { AvailabilityService } from '../services/availability.service';
+
+@Component({
+    selector: 'app-availability',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
+    templateUrl: './availability.component.html',
+    styleUrl: './availability.component.css'
+})
+export class AvailabilityComponent implements OnInit {
+    slots: any[] = [];
+    isLoading = false;
+
+    WEEKDAYS = [
+        { value: 0, label: 'Lundi' },
+        { value: 1, label: 'Mardi' },
+        { value: 2, label: 'Mercredi' },
+        { value: 3, label: 'Jeudi' },
+        { value: 4, label: 'Vendredi' },
+        { value: 5, label: 'Samedi' },
+        { value: 6, label: 'Dimanche' },
+    ];
+
+    newSlot = { weekday: 0, start_time: '09:00', end_time: '17:00' };
+    errorMessage = '';
+
+    constructor(private availabilityService: AvailabilityService) { }
+
+    ngOnInit() { this.loadSlots(); }
+
+    loadSlots() {
+        this.isLoading = true;
+        this.availabilityService.getMySlots().subscribe({
+            next: (data: any[]) => { this.slots = data; this.isLoading = false; },
+            error: () => this.isLoading = false
+        });
+    }
+
+    addSlot() {
+        this.errorMessage = '';
+        if (this.newSlot.start_time >= this.newSlot.end_time) {
+            this.errorMessage = 'L\'heure de fin doit être après l\'heure de début.';
+            return;
+        }
+        this.availabilityService.addSlot(this.newSlot).subscribe({
+            next: () => this.loadSlots(),
+            error: (err: any) => {
+                this.errorMessage = err?.error?.non_field_errors?.[0] || 'Erreur lors de l\'ajout.';
+            }
+        });
+    }
+
+    deleteSlot(id: number) {
+        if (!confirm('Supprimer ce créneau ?')) return;
+        this.availabilityService.deleteSlot(id).subscribe({ next: () => this.loadSlots() });
+    }
+
+    weekdayLabel(day: number): string {
+        return this.WEEKDAYS.find(w => w.value === day)?.label || String(day);
+    }
+
+    slotsByDay(day: number): any[] {
+        return this.slots.filter(s => s.weekday === day);
+    }
+}

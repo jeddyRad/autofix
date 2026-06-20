@@ -1,0 +1,52 @@
+<div class="dashboard-page container">
+    <div class="dashboard-header">
+        <div>
+            <h1>Historique des Interventions</h1>
+            <p class="subtitle">Filtrez et exportez l'ensemble de vos rendez-vous.</p>
+        </div>
+        <button class="btn btn-primary" (click)="exportCsv()">⬇ Exporter CSV</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+        <select [(ngModel)]="filters.status" (change)="load()">
+            <option *ngFor="let s of STATUSES" [value]="s.value">{{ s.label }}</option>
+        </select>
+        <input type="date" [(ngModel)]="filters.date_from" (change)="load()" placeholder="Date début">
+        <input type="date" [(ngModel)]="filters.date_to" (change)="load()" placeholder="Date fin">
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-container">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Table -->
+    <div *ngIf="!isLoading" class="table-wrapper">
+        <table *ngIf="appointments.length > 0">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Créneau</th>
+                    <th>Prestataire</th>
+                    <th>Véhicule</th>
+                    <th>Statut</th>
+                    <th>Paiement</th>
+                    <th>Prix</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let apt of appointments">
+                    <td>{{ apt.date }}</td>
+                    <td>{{ apt.time_slot }}</td>
+                    <td>{{ apt.provider_detail?.first_name }} {{ apt.provider_detail?.last_name }}</td>
+                    <td>{{ apt.vehicle_info }}</td>
+                    <td><span class="status-badge {{ apt.status }}">{{ statusLabel(apt.status) }}</span></td>
+                    <td>{{ apt.payment_status === 'PAID' ? '✅ Payé' : '—' }}</td>
+                    <td>{{ apt.price }} €</td>
+                </tr>
+            </tbody>
+        </table>
+        <div *ngIf="appointments.length === 0" class="empty-state">Aucun rendez-vous trouvé pour ces filtres.</div>
+    </div>
+</div>

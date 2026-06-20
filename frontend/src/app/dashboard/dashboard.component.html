@@ -42,6 +42,31 @@
     </div>
   </div>
 
+  <!-- Provider Enriched Stats -->
+  <div class="stats-grid provider-stats" *ngIf="role === 'PROVIDER' && providerStats">
+    <div class="stat-card revenue">
+      <div class="stat-icon"><fa-icon [icon]="faWallet"></fa-icon></div>
+      <div class="stat-info">
+        <span class="stat-number">{{ providerStats.total_revenue }} €</span>
+        <span class="stat-label">Chiffre d'affaires total</span>
+      </div>
+    </div>
+    <div class="stat-card review">
+      <div class="stat-icon"><fa-icon [icon]="faStar"></fa-icon></div>
+      <div class="stat-info">
+        <span class="stat-number">{{ providerStats.average_rating | number:'1.1-1' }} / 5</span>
+        <span class="stat-label">Note Moyenne</span>
+      </div>
+    </div>
+    <div class="stat-card completion">
+      <div class="stat-icon"><fa-icon [icon]="faChartLine"></fa-icon></div>
+      <div class="stat-info">
+        <span class="stat-number">{{ providerStats.completion_rate | number:'1.0-0' }}%</span>
+        <span class="stat-label">Taux de complétion</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Tabs -->
   <div class="tab-bar">
     <button [class.active]="activeTab === 'appointments'" (click)="activeTab = 'appointments'">Rendez-vous</button>

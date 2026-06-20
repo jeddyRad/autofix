@@ -5,8 +5,11 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { AppointmentService } from '../services/appointment.service';
 import { PaymentService } from '../services/payment.service';
+import { ToastService } from '../shared/toast.service';
+import { HttpClient } from '@angular/common/http';
+import { API_BASE_URL } from '../config/api.config';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faClipboardList, faCheckCircle, faTrophy, faTimesCircle, faCalendarAlt, faCreditCard, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faClipboardList, faCheckCircle, faTrophy, faTimesCircle, faCalendarAlt, faCreditCard, faStar, faWallet, faChartLine } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,12 +26,17 @@ export class DashboardComponent implements OnInit {
   faCalendarAlt = faCalendarAlt;
   faCreditCard = faCreditCard;
   faStar = faStar;
+  faWallet = faWallet;
+  faChartLine = faChartLine;
 
   authService = inject(AuthService);
   appointmentService = inject(AppointmentService);
   paymentService = inject(PaymentService);
+  toastService = inject(ToastService);
+  http = inject(HttpClient);
 
   appointments: any[] = [];
+  providerStats: any = null;
   isLoading = true;
   activeTab = 'appointments';
 
@@ -53,6 +61,16 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAppointments();
+    if (this.role === 'PROVIDER') {
+      this.loadProviderStats();
+    }
+  }
+
+  loadProviderStats(): void {
+    this.http.get(`${API_BASE_URL}/api/auth/provider/stats/`).subscribe({
+      next: (stats) => this.providerStats = stats,
+      error: (err) => console.error('Failed to load stats', err)
+    });
   }
 
   loadAppointments(): void {
@@ -110,28 +128,44 @@ export class DashboardComponent implements OnInit {
   acceptAppointment(): void {
     if (!this.actionAppointment) return;
     this.appointmentService.acceptAppointment(this.actionAppointment.id, this.priceInput).subscribe({
-      next: () => { this.closeAction(); this.loadAppointments(); },
-      error: (err) => console.error(err)
+      next: () => {
+        this.closeAction();
+        this.loadAppointments();
+        this.toastService.success('Rendez-vous accepté !');
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastService.error('Erreur lors de l\'acceptation.');
+      }
     });
   }
 
   cancelAppointment(id: number): void {
     this.appointmentService.cancelAppointment(id).subscribe({
-      next: () => this.loadAppointments(),
+      next: () => {
+        this.loadAppointments();
+        this.toastService.info('Rendez-vous annulé.');
+      },
       error: (err) => console.error(err)
     });
   }
 
   startAppointment(id: number): void {
     this.appointmentService.startAppointment(id).subscribe({
-      next: () => this.loadAppointments(),
+      next: () => {
+        this.loadAppointments();
+        this.toastService.success('Intervention démarrée !');
+      },
       error: (err) => console.error(err)
     });
   }
 
   completeAppointment(id: number): void {
     this.appointmentService.completeAppointment(id).subscribe({
-      next: () => this.loadAppointments(),
+      next: () => {
+        this.loadAppointments();
+        this.toastService.success('Intervention terminée avec succès !');
+      },
       error: (err) => console.error(err)
     });
   }
@@ -179,8 +213,9 @@ export class DashboardComponent implements OnInit {
       next: () => {
         this.closeEdit();
         this.loadAppointments();
+        this.toastService.success('Mise à jour réussie.');
       },
-      error: (err: any) => alert('Erreur lors de la modification.')
+      error: (err: any) => this.toastService.error('Erreur lors de la modification.')
     });
   }
 
@@ -194,6 +229,7 @@ export class DashboardComponent implements OnInit {
       next: () => {
         this.closeReview();
         this.loadAppointments();
+        this.toastService.success('Merci pour votre avis !');
       },
       error: (err) => console.error(err)
     });

@@ -1,0 +1,79 @@
+.dashboard-page {
+    padding: 2rem 1rem;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.filter-bar select,
+.filter-bar input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #f5f7fa;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    padding: 0.2em 0.6em;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.status-badge.COMPLETED {
+    background: #e6f4ea;
+    color: #1e8e3e;
+}
+
+.status-badge.CANCELLED {
+    background: #fce8e6;
+    color: #c5221f;
+}
+
+.status-badge.PENDING {
+    background: #fff8e1;
+    color: #f57f17;
+}
+
+.status-badge.ACCEPTED {
+    background: #e8f0fe;
+    color: #1a73e8;
+}
+
+.status-badge.IN_PROGRESS {
+    background: #f3e8fd;
+    color: #7b1fa2;
+}

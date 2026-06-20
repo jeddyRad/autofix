@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Avg, Sum, Count
+from decimal import Decimal
 from .serializers import UserSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -283,3 +285,42 @@ class AdminProviderVerifyView(APIView):
         profile.is_verified = True
         profile.save()
         return Response({'message': f'Prestataire {provider.email} validé.'}, status=status.HTTP_200_OK)
+
+
+class IsProviderUser(IsAuthenticated):
+    """Permission that requires the user to have role PROVIDER."""
+    def has_permission(self, request, view):
+        return super().has_permission(request, view) and request.user.role == 'PROVIDER'
+
+
+class ProviderStatsView(APIView):
+    """
+    GET /api/auth/provider/stats/
+    Returns statistics for the authenticated provider:
+    - nb_appointments_total
+    - nb_completed
+    - revenue_total
+    - average_rating
+    - nb_reviews
+    """
+    permission_classes = [IsProviderUser]
+
+    def get(self, request):
+        from booking.models import Appointment, Review
+        user = request.user
+
+        apts = Appointment.objects.filter(provider=user)
+        completed = apts.filter(status='COMPLETED')
+        paid_completed = completed.filter(payment_status='PAID')
+
+        revenue = paid_completed.aggregate(total=Sum('price'))['total'] or Decimal('0')
+        avg = Review.objects.filter(provider=user).aggregate(avg=Avg('rating'))['avg']
+        nb_reviews = Review.objects.filter(provider=user).count()
+
+        return Response({
+            'nb_appointments_total': apts.count(),
+            'nb_completed': completed.count(),
+            'revenue_total': float(revenue),
+            'average_rating': round(avg, 2) if avg else 0.0,
+            'nb_reviews': nb_reviews,
+        })
