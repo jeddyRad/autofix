@@ -22,6 +22,7 @@ done
 echo "PostgreSQL is ready."
 
 python manage.py migrate --noinput
+python manage.py collectstatic --noinput
 
 if [ "$DJANGO_RUNSERVER" = "true" ]; then
   echo "Starting Django development server..."

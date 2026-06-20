@@ -61,34 +61,38 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   selectPartner(conversation: any): void {
     this.selectedPartner = conversation.partner;
-    this.loadMessages();
+    this.loadMessages(true);
     this.startPolling();
   }
 
   selectPartnerById(partnerId: string): void {
     this.selectedPartner = { id: partnerId };
-    this.loadMessages();
+    this.loadMessages(true);
     this.startPolling();
   }
 
-  loadMessages(): void {
+  loadMessages(autoScroll: boolean = false): void {
     if (!this.selectedPartner) return;
     this.chatService.getHistory(this.selectedPartner.id).subscribe({
-      next: (data) => {
+      next: (data: any[]) => {
+        const atBottom = this.isAtBottom();
+        const isNewMessage = this.messages.length !== data.length;
         this.messages = data;
-        setTimeout(() => this.scrollToBottom(), 100);
+        if (autoScroll || (isNewMessage && atBottom)) {
+          setTimeout(() => this.scrollToBottom(), 100);
+        }
       },
-      error: (err) => console.error(err)
+      error: (err: any) => console.error(err)
     });
   }
 
   sendMessage(): void {
     if (!this.newMessage.trim() || !this.selectedPartner) return;
-    
+
     this.chatService.sendMessage(this.selectedPartner.id, this.newMessage.trim()).subscribe({
       next: () => {
         this.newMessage = '';
-        this.loadMessages();
+        this.loadMessages(true);
         this.loadConversations();
       },
       error: (err) => console.error(err)
@@ -114,7 +118,17 @@ export class ChatComponent implements OnInit, OnDestroy {
       if (this.messagesContainer) {
         this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
       }
-    } catch (e) {}
+    } catch (e) { }
+  }
+
+  isAtBottom(): boolean {
+    if (!this.messagesContainer) return true;
+    const el = this.messagesContainer.nativeElement;
+    return Math.abs(el.scrollHeight - el.scrollTop - el.clientHeight) < 100;
+  }
+
+  trackById(index: number, item: any): any {
+    return item.id || index;
   }
 
   isOwnMessage(msg: any): boolean {

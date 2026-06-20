@@ -9,12 +9,12 @@
     <div class="filter-grid">
       <div class="filter-group">
         <label for="search">Rechercher</label>
-        <input type="text" id="search" [(ngModel)]="searchQuery" (ngModelChange)="loadProviders()" placeholder="Nom, garage, mot-clé...">
+        <input type="text" id="search" [(ngModel)]="searchQuery" (ngModelChange)="onFilterChange()" placeholder="Nom, garage, mot-clé...">
       </div>
       
       <div class="filter-group">
         <label for="city">Ville</label>
-        <select id="city" [(ngModel)]="selectedCity" (change)="loadProviders()">
+        <select id="city" [(ngModel)]="selectedCity" (change)="onFilterChange()">
           <option value="">Toutes les villes</option>
           <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
         </select>
@@ -22,7 +22,7 @@
 
       <div class="filter-group">
         <label for="specialty">Spécialité</label>
-        <select id="specialty" [(ngModel)]="selectedSpecialty" (change)="loadProviders()">
+        <select id="specialty" [(ngModel)]="selectedSpecialty" (change)="onFilterChange()">
           <option value="">Toutes les spécialités</option>
           <option *ngFor="let spec of specialties" [value]="spec.value">{{ spec.label }}</option>
         </select>
