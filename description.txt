@@ -1,0 +1,82 @@
+Projet : AutoFix MG - Application de maintenance automobile
+Collabs : Falco Kiady ANDRIANAIVOLAMBO/103531
+  	     Tihary Mirua RANOELIMANANTSOA/103477
+
+
+
+1. Déscription du projet
+
+AutoFixMG est une plateforme web qui met en relation les propriétaires de véhicules avec des dépanneurs, mécaniciens et garages . Elle permet de résoudre rapidement les problèmes de panne ou d’entretien automobile.
+
+Objectifs principaux : 
+- Faciliter le contact avec un dépanneur/mécanicien
+- Simplifier la prise de rendez-vous.
+- Assurer une communication fluide entre clients et prestataires
+- Sécuriser les paiements.
+
+Fonctionnalités :
+- Se connecter
+- Chercher garage/dépanneur/mécanicien
+- Prendre RDV auprès d’un garage
+- Se communiquer entre client et garagiste
+- Paiement via Stripe
+- Consulter les historiques
+
+Public cible :
+- Propriétaires de véhicules 
+- Mécaniciens indépendants et garages 
+
+Impact :
+- Réduction du temps de recherche de mécanicien 
+- Traçabilité des interventions.
+
+
+2. Analyse PESTEL
+
+Facteur Politique : L’instabilité politique récurrente et la transition gouvernementale donne une opportunité de partenariat pour l’application avec les minisitères conçernées.
+
+Facteur Economique : La domination de l’économie informelle et le faible pouvoir d’achat pousse une forte demande de services facile d’accessibilités et abordables.
+
+Facteur Social : La population étant jeune, le besoin de services s’élève avec le taux d’équipement automobile.
+Facteur technologique : Grace au progression de la digitalisation, il est possible d’intégrer la géolocalisation et faciliter la transition vers un app mobile, les paiements Mobile Money s’avère etre opportun.
+
+Facteur Environnemental : La vulnerabilité de Madagascar aux catastrophes naturelles entraineraient une demande agrue de dépanage, mais pourrait aussi interrompre le service en cas de dégat post-evenement.
+
+Facteur Legal : Reglementation des services et protection des données.
+
+
+3. Analyse MosCow
+
+Must Have :
+- Inscription / authentification clients et prestataires
+- Recherche de dépanneurs/mécaniciens proches    
+- Prise de rendez-vous simple  
+- Paiement intégré  
+- Tableau de bord admin
+- Système de messagerie/chat entre client et prestataire.
+
+Should Have :    
+- Bouton "Appel d’urgence"
+- Notation et avis des prestataires
+- Historique des interventions et factures    
+
+Could have :
+- Notifications push/SMS.
+- Suivi en temps réel du dépanneur.  
+- Intégration calendrier Google/Outlook.
+
+Won’t Have :
+- Recommandations IA
+- Application native iOS/Android dédiée.    
+- Marketplace de pièces détachées.
+
+
+4. Organisation du travail dans le groupe
+
+Stack utilisés : Angular + Django
+
+- Conception 
+- Initialisation du projet et mise en place des outils
+- Développement de l’interface utilisateur
+- Implementation des taches prioritaires
+- Integration API

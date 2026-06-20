@@ -1,0 +1,122 @@
+Projet : AutoFix MG – Plateforme de maintenance et dépannage automobile
+Présenté par :
+	ANDRIANKAJA Herimbolatiana Finoana
+	RADAFINIAINA Mamitiana Jedidia
+
+1. DESCRIPTION GÉNÉRALE DU PROJET
+1.1 Contexte et Objectifs
+À Madagascar, le parc automobile connaît une croissance soutenue, notamment dans les zones urbaines comme Antananarivo. Pourtant, la recherche d'un mécanicien, d'un dépanneur ou d'un garage fiable reste fastidieuse : les prestataires sont dispersés, l'économie informelle domine le secteur et les propriétaires de véhicules peinent à comparer les tarifs, vérifier la qualité des interventions ou conserver une trace de leurs réparations. Les paiements se font souvent en espèces, sans garantie ni reçu numérique.
+La plateforme web "AutoFix MG" vise à répondre à ces difficultés en mettant en relation les propriétaires de véhicules avec des dépanneurs, mécaniciens indépendants et garages professionnels qualifiés. Elle permet de rechercher un prestataire, de prendre rendez-vous en ligne, de communiquer via un chat intégré et de régler les prestations de manière sécurisée. L'objectif est de réduire le temps de recherche, d'améliorer la traçabilité des interventions et de renforcer la confiance entre clients et prestataires.
+1.2 Cibles et Utilisateurs du Système
+La plateforme identifie et gère trois profils d'utilisateurs distincts :
+1.	Le Client : Particulier propriétaire de véhicule, équipé d'un smartphone ou d'un ordinateur. Il recherche un prestataire par ville ou spécialité, consulte les profils, prend rendez-vous, communique via le chat et règle en ligne via Stripe.
+2.	Le Prestataire : Mécanicien, dépanneur ou garage professionnel. Il gère son profil professionnel, ses disponibilités, ses services et tarifs, accepte ou refuse les demandes de rendez-vous et suit ses statistiques d'activité.
+3.	L'Administrateur : Gestionnaire de la plateforme. Il valide les comptes prestataires, modère les avis, supervise les utilisateurs et consulte les statistiques globales du système.
+
+ 2. FONCTIONNALITÉS PRINCIPALES
+Le projet reprend le noyau fonctionnel défini dans le cahier des charges et poursuit le développement d'un MVP déjà amorcé par l'équipe précédente :
+•	Authentification sécurisée : Inscription avec vérification OTP par email, connexion/déconnexion JWT, gestion des rôles (Client / Prestataire / Admin), profil utilisateur complet et réinitialisation du mot de passe.
+•	Espace Client : Recherche de prestataires (filtres par ville, spécialité, note), consultation des profils détaillés, prise de rendez-vous en ligne, historique des interventions, notation et avis après service, chat avec le prestataire.
+•	Espace Prestataire : Création et gestion du profil professionnel, gestion du planning et des disponibilités, consultation et traitement des rendez-vous reçus (acceptation, refus, clôture), gestion des services proposés et tarifs, tableau de bord statistiques.
+•	Module Réservation : Système de calendrier, création/modification/annulation de RDV, workflow de statuts (En attente / Confirmé / En cours / Terminé / Annulé), notifications email et in-app.
+•	Module Chat : Discussion entre Client et Prestataire, avec historique des messages.
+•	Administration : Gestion des utilisateurs, validation des prestataires, modération des avis et statistiques globales.
+•	Paiement : Intégration Stripe pour sécuriser les transactions ; le Mobile Money (Mvola, Orange Money, Airtel Money) est identifié comme opportunité d'adaptation au contexte malgache.
+
+État d'avancement hérité du projet existant :
+•	Déjà livré (MVP) : Authentification (login, rôles, profil), recherche de prestataires, prise de RDV et gestion des statuts, chat, notation/avis, paiement Stripe (checkout), dashboard prestataire.
+•	Reste à finaliser : Correction des bugs OTP (inscription, mot de passe oublié, suppression de profil), historique client, modification de RDV, stabilisation de la session de paiement Stripe, dashboard client, interface admin minimale et conteneurisation Docker pour le déploiement.
+
+3. ARCHITECTURE TECHNIQUE ENVISAGÉE
+Pour garantir la séparation des responsabilités et assurer une scalabilité future, le projet adopte une architecture découplée (Client/Serveur) :
+FRONT-END : Angular 17 (Standalone Components), interface responsive Mobile First, Font Awesome, intégration JWT
+BACK-END : Django 6 & Django REST Framework (DRF), authentification SimpleJWT, envoi d'emails SMTP (OTP et reset)
+BASE DE DONNEES : PostgreSQL (production) / SQLite (développement)
+PAIEMENT : Stripe API
+CONTENEURISATION : Docker & Docker Compose (services frontend, backend, PostgreSQL ; orchestration locale et préparation au déploiement)
+DEPOT GIT : https://github.com/tiharymirua/autofix
+
+ 4. ANALYSE PESTEL DU PROJET (MADAGASCAR)
+Politique (P)
+•	Menace : Instabilité politique récurrente et transitions gouvernementales pouvant ralentir les initiatives numériques et les partenariats institutionnels.
+•	Opportunité : Possibilité de partenariat avec les ministères concernés (Transport, Développement Numérique) pour la certification et la référencement des prestataires agréés sur la plateforme.
+Économique (E)
+•	Menace : Faible pouvoir d'achat et domination de l'économie informelle limitant la capacité des clients à payer des tarifs élevés ; coût du carburant volatil impactant les déplacements des dépanneurs.
+•	Opportunité : Forte demande de services automobiles accessibles et transparents ; faible taux de bancarisation classique ouvrant la voie au Mobile Money (Mvola, Orange Money, Airtel Money) en complément de Stripe.
+Sociologique (S)
+•	Menace : Méfiance envers les prestataires non référencés et absence de système d'avis formalisé dans le secteur informel.
+•	Opportunité : Population jeune et croissance du taux d'équipement automobile à Antananarivo et dans les grandes villes ; besoin croissant de traçabilité et de communication directe client-prestataire.
+Technologique (T)
+•	Menace : Connectivité 4G hétérogène en dehors des centres urbains et coût de la data mobile pour les petits garages.
+•	Opportunité : Progression de la digitalisation à Madagascar permettant l'intégration de la géolocalisation, du chat et des paiements en ligne ; stack Angular/Django/PostgreSQL adaptée à un déploiement progressif.
+Écologique (E)
+•	Menace : Vulnérabilité de Madagascar aux cyclones et catastrophes naturelles entraînant des coupures de routes et des interruptions de service après les événements.
+•	Opportunité : Pics de demande de dépannage post-catastrophe pouvant être captés via la plateforme si le service reste accessible en zones urbaines.
+Légal (L)
+•	Menace : Évolution des réglementations sur la protection des données personnelles et sur les transactions financières en ligne à Madagascar.
+•	Opportunité : Cadre juridique favorable à la formalisation progressive des garages et mécaniciens indépendants via une plateforme de mise en relation structurée.
+
+5. ANALYSE MOSCOW DES FONCTIONNALITÉS
+Compte tenu du délai de deux semaines et de la reprise d'un MVP déjà amorcé (~65 % livré), la priorisation ci-dessous vise une démo fonctionnelle crédible. Les éléments déjà opérationnels sont conservés ; seuls les manquants critiques et la conteneurisation Docker sont imposés en Must Have.
+
+MUST HAVE (Sprint 2 semaines — livrables obligatoires)
+•	Inscription et authentification sécurisée pour les clients et prestataires, incluant la correction des bugs OTP (inscription, mot de passe oublié, suppression de profil).
+•	Recherche de dépanneurs, mécaniciens et garages (filtres par ville, spécialité) — déjà livré, à stabiliser.
+•	Prise de rendez-vous en ligne avec workflow complet des statuts, incluant la modification et l'annulation de RDV.
+•	Paiement intégré via Stripe, avec session de paiement stable et fonctionnelle (correction du bug session).
+•	Système de messagerie/chat entre client et prestataire — déjà livré, à stabiliser.
+•	Notation et avis des prestataires après intervention — déjà partiellement livré, stabilisation incluse dans le sprint.
+•	Dashboard client fonctionnel (consultation des rendez-vous en cours et historique basique).
+•	Interface administrateur minimale : validation des comptes prestataires et modération des avis (via écrans dédiés ou Django Admin).
+•	Conteneurisation Docker : Dockerfile frontend et backend, docker-compose.yml (Angular + Django + PostgreSQL), variables d'environnement et lancement unifié de la stack.
+
+SHOULD HAVE (Si marge disponible en fin de sprint)
+•	Historique complet des interventions (filtres, détail par prestation, export simple).
+•	Gestion des disponibilités côté prestataire (créneaux hebdomadaires).
+•	Notifications email (confirmation, rappel et annulation de rendez-vous via SMTP).
+•	Amélioration du dashboard prestataire (statistiques enrichies).
+
+COULD HAVE (Hors périmètre sprint — évolutions futures)
+•	Génération de factures PDF après intervention.
+•	Notifications push ou SMS pour les mises à jour de rendez-vous.
+•	Recherche par géolocalisation des prestataires les plus proches.
+•	Intégration Mobile Money (Mvola, Orange Money, Airtel Money).
+
+WON'T HAVE (Exclu du périmètre actuel)
+•	Bouton "Appel d'urgence" dédié.
+•	Recommandations par intelligence artificielle.
+•	Application native iOS/Android dédiée sur les stores.
+•	Marketplace de pièces détachées automobile.
+
+6. ORGANISATION DU TRAVAIL ET RÉPARTITION DANS LE GROUPE
+L'équipe projet adopte une approche hybride sur un sprint de deux semaines : une phase initiale d'audit menée conjointement (jours 1–2), une phase de production parallèle Front/Back (jours 3–8), puis une phase d'intégration Docker et recette finale (jours 9–10).
+
+	Phase Commune : Audit, Priorisation & Contrat d'API (Jours 1–2 — ANDRIANKAJA & RADAFINIAINA)
+•	Audit du dépôt Git (https://github.com/tiharymirua/autofix) et recensement de l'état d'avancement par module.
+•	Identification et documentation des bugs bloquants (OTP, session Stripe).
+•	Mise à jour du contrat d'API REST (modification RDV, historique, administration).
+•	Figeage du périmètre Must Have selon l'analyse MoSCoW (section 5).
+
+	Phase de Production Spécialisée (Jours 3–8)
+ANDRIANKAJA Herimbolatiana Finoana : Responsable Client & Interface (Front-End Lead)
+•	Technologies principales : Angular 17, HTML5, CSS3, Font Awesome.
+•	Périmètre Must Have :
+o	Dashboard client et historique basique des rendez-vous.
+o	Interface admin minimale (validation prestataires, modération avis).
+o	Écran de modification/annulation de RDV et correction UX paiement Stripe.
+o	Stabilisation des modules existants (recherche, chat, avis).
+•	Périmètre Should Have (si marge) : écrans de gestion des disponibilités prestataire.
+
+RADAFINIAINA Mamitiana Jedidia : Responsable Données, Logique & Administration (Back-End Lead)
+•	Technologies principales : Django 6, Django REST Framework (DRF), PostgreSQL.
+•	Périmètre Must Have :
+o	Correction des bugs OTP (inscription, reset, suppression profil).
+o	Endpoints modification RDV, historique client et admin (validation, modération).
+o	Stabilisation Stripe (session de paiement, webhooks).
+•	Périmètre Should Have (si marge) : disponibilités prestataire, notifications SMTP.
+
+	Phase Intégration & Déploiement (Jours 9–10 — ANDRIANKAJA & RADAFINIAINA)
+•	Rédaction des Dockerfile (frontend Angular, backend Django) et du docker-compose.yml (frontend + backend + PostgreSQL).
+•	Configuration des variables d'environnement (.env : base de données, JWT, Stripe, SMTP).
+•	Tests bout en bout de la stack conteneurisée et préparation de la démo finale.
+
