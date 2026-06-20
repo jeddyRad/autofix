@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'email', 'password', 'first_name', 'last_name', 
                  'role', 'phone', 'city', 'provider_profile')
-        read_only_fields = ('id', 'email')
+        read_only_fields = ('id',)
 
     def validate(self, data):
         # We only require provider_profile during creation
@@ -45,8 +45,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('provider_profile', None)
-        
         password = validated_data.pop('password', None)
+        validated_data.pop('email', None) # DO NOT allow email updates
+        
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
             
