@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.urls import path, include
 #Routes each frontend request to each concerned app 
 urlpatterns = [
-    path('admin/', admin.site.norm_url if hasattr(admin.site, 'norm_url') else admin.site.urls),
+    path('admin/', admin.site.urls),
     # Routes frontend authentication requests
     path('api/auth/', include('accounts.urls')),
     
