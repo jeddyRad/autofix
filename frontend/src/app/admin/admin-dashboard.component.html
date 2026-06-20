@@ -1,0 +1,66 @@
+<div class="dashboard-page container">
+    <div class="dashboard-header">
+        <div>
+            <h1>Administration Globale <fa-icon [icon]="faShieldAlt" class="text-primary"></fa-icon></h1>
+            <p class="subtitle">Modération des avis et validation des prestataires.</p>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button [class.active]="activeTab === 'providers'" (click)="activeTab = 'providers'">Prestataires</button>
+        <button [class.active]="activeTab === 'reviews'" (click)="activeTab = 'reviews'">Avis vérifiés</button>
+    </div>
+
+    <div *ngIf="activeTab === 'providers'" class="section">
+        <div *ngIf="isLoadingProviders" class="loading-container">
+            <div class="spinner"></div>
+        </div>
+        <div *ngIf="!isLoadingProviders">
+            <div *ngFor="let provider of providers" class="appointment-card"
+                style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3>{{ provider.first_name }} {{ provider.last_name }} ({{ provider.provider_profile?.business_name
+                        }})</h3>
+                    <p>{{ provider.email }} - {{ provider.city }} - <span class="badge">{{
+                            provider.provider_profile?.specialty }}</span></p>
+                    <p>
+                        Status:
+                        <span *ngIf="provider.provider_profile?.is_verified"
+                            class="status-badge ACCEPTED">Vérifié</span>
+                        <span *ngIf="!provider.provider_profile?.is_verified" class="status-badge PENDING">En
+                            attente</span>
+                    </p>
+                </div>
+                <div>
+                    <button *ngIf="!provider.provider_profile?.is_verified" class="btn btn-primary"
+                        (click)="verifyProvider(provider.id)">
+                        <fa-icon [icon]="faCheckCircle"></fa-icon> Valider
+                    </button>
+                </div>
+            </div>
+            <div *ngIf="providers.length === 0" class="empty-state">Aucun prestataire enregistré.</div>
+        </div>
+    </div>
+
+    <div *ngIf="activeTab === 'reviews'" class="section">
+        <div *ngIf="isLoadingReviews" class="loading-container">
+            <div class="spinner"></div>
+        </div>
+        <div *ngIf="!isLoadingReviews">
+            <div *ngFor="let review of reviews" class="appointment-card"
+                style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <p><strong>{{ review.rating }} / 5</strong> - <em>{{ review.comment }}</em></p>
+                    <p style="font-size: 0.9em; color: #666;">Par {{ review.client_detail?.first_name }} pour {{
+                        review.provider_detail?.first_name }}</p>
+                </div>
+                <div>
+                    <button class="btn btn-danger btn-sm" (click)="deleteReview(review.id)">
+                        <fa-icon [icon]="faTrash"></fa-icon> Supprimer
+                    </button>
+                </div>
+            </div>
+            <div *ngIf="reviews.length === 0" class="empty-state">Aucun avis publié pour le moment.</div>
+        </div>
+    </div>
+</div>
