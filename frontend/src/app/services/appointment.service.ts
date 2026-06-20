@@ -9,7 +9,7 @@ import { API_BASE_URL } from '../config/api.config';
 export class AppointmentService {
   private apiUrl = `${API_BASE_URL}/api`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/appointments/`);
@@ -19,12 +19,20 @@ export class AppointmentService {
     return this.http.post<any>(`${this.apiUrl}/appointments/`, appointmentData);
   }
 
+  updateAppointment(id: number, data: any): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/appointments/${id}/`, data);
+  }
+
   acceptAppointment(id: number, price?: number): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/appointments/${id}/accept/`, { price });
   }
 
   cancelAppointment(id: number): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/appointments/${id}/cancel/`, {});
+  }
+
+  startAppointment(id: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/appointments/${id}/start/`, {});
   }
 
   completeAppointment(id: number): Observable<any> {

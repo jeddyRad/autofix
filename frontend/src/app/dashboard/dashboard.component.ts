@@ -23,7 +23,7 @@ export class DashboardComponent implements OnInit {
   faCalendarAlt = faCalendarAlt;
   faCreditCard = faCreditCard;
   faStar = faStar;
-  
+
   authService = inject(AuthService);
   appointmentService = inject(AppointmentService);
   paymentService = inject(PaymentService);
@@ -41,6 +41,15 @@ export class DashboardComponent implements OnInit {
   reviewAppointment: any = null;
   reviewRating = 5;
   reviewComment = '';
+
+  // Edit form
+  editAppointment: any = null;
+  editData: any = {
+    date: '',
+    time_slot: '',
+    vehicle_info: '',
+    problem_description: ''
+  };
 
   ngOnInit(): void {
     this.loadAppointments();
@@ -73,7 +82,7 @@ export class DashboardComponent implements OnInit {
   }
 
   get activeAppointments(): any[] {
-    return this.appointments.filter(a => a.status === 'ACCEPTED');
+    return this.appointments.filter(a => a.status === 'ACCEPTED' || a.status === 'IN_PROGRESS');
   }
 
   get completedAppointments(): any[] {
@@ -113,6 +122,13 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  startAppointment(id: number): void {
+    this.appointmentService.startAppointment(id).subscribe({
+      next: () => this.loadAppointments(),
+      error: (err) => console.error(err)
+    });
+  }
+
   completeAppointment(id: number): void {
     this.appointmentService.completeAppointment(id).subscribe({
       next: () => this.loadAppointments(),
@@ -143,6 +159,31 @@ export class DashboardComponent implements OnInit {
     this.reviewAppointment = null;
   }
 
+  openEdit(appointment: any): void {
+    this.editAppointment = appointment;
+    this.editData = {
+      date: appointment.date,
+      time_slot: appointment.time_slot,
+      vehicle_info: appointment.vehicle_info,
+      problem_description: appointment.problem_description
+    };
+  }
+
+  closeEdit(): void {
+    this.editAppointment = null;
+  }
+
+  submitEdit(): void {
+    if (!this.editAppointment) return;
+    this.appointmentService.updateAppointment(this.editAppointment.id, this.editData).subscribe({
+      next: () => {
+        this.closeEdit();
+        this.loadAppointments();
+      },
+      error: (err: any) => alert('Erreur lors de la modification.')
+    });
+  }
+
   submitReview(): void {
     if (!this.reviewAppointment) return;
     this.appointmentService.submitReview({
@@ -162,6 +203,7 @@ export class DashboardComponent implements OnInit {
     const map: any = {
       'PENDING': 'En attente',
       'ACCEPTED': 'Accepté',
+      'IN_PROGRESS': 'En cours',
       'COMPLETED': 'Terminé',
       'CANCELLED': 'Annulé'
     };
