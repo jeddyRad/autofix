@@ -8,9 +8,11 @@ Plateforme web de mise en relation entre propriétaires de véhicules et prestat
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installé et démarré
 
-## Configuration
+## Configuration & Collaboration
 
-Copiez le fichier d'environnement exemple :
+Si vous rejoignez le projet et souhaitez le tester localement avec les clés API (Stripe, SMTP) et Docker, **veuillez d'abord lire le [Guide de Collaboration](COLLABORATION_GUIDE.md)** spécialement prévu à cet effet.
+
+Sinon, de manière résumée, copiez le fichier d'environnement exemple :
 
 ```bash
 cp .env.example .env
