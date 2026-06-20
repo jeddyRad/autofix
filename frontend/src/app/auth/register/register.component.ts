@@ -23,7 +23,7 @@ export class RegisterComponent {
   password = '';
   phone = '';
   city = '';
-  
+
   // Provider profile fields
   business_name = '';
   address = '';
@@ -91,7 +91,7 @@ export class RegisterComponent {
     if (!this.otpCode) return;
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     this.authService.verifyOtp({ email: this.email, otp: this.otpCode }).subscribe({
       next: () => {
         this.authService.login({ email: this.email, password: this.password }).subscribe({
@@ -108,6 +108,22 @@ export class RegisterComponent {
       error: (err) => {
         this.isLoading = false;
         this.errorMessage = "Code OTP invalide ou expiré.";
+      }
+    });
+  }
+
+  resendOtp(): void {
+    if (!this.email) return;
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.authService.resendOtp({ email: this.email }).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.errorMessage = 'Un nouveau code a été envoyé. Veuillez vérifier vos emails.';
+      },
+      error: () => {
+        this.isLoading = false;
+        this.errorMessage = "Impossible de renvoyer le code. Veuillez réessayer.";
       }
     });
   }

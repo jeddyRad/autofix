@@ -44,6 +44,10 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/verify-otp/`, data);
   }
 
+  resendOtp(data: { email: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/resend-otp/`, data);
+  }
+
   forgotPassword(email: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/forgot-password/`, { email });
   }
