@@ -11,13 +11,22 @@ from django.db.models import Avg
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+
+# ─── Permission helpers ────────────────────────────────────────────────────────
+
+def _is_admin(user):
+    return user.role == 'ADMIN'
+
+
+# ─── Appointment ViewSet ──────────────────────────────────────────────────────
+
 class AppointmentViewSet(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'ADMIN':
+        if _is_admin(user):
             return Appointment.objects.all().order_by('-date')
         elif user.role == 'PROVIDER':
             return Appointment.objects.filter(provider=user).order_by('-date')
@@ -27,65 +36,135 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(client=self.request.user, status='PENDING')
 
+    def partial_update(self, request, *args, **kwargs):
+        """
+        PATCH /api/appointments/<id>/
+        Client can modify date/time_slot/vehicle_info/problem_description
+        only while the appointment is still PENDING.
+        """
+        appointment = self.get_object()
+        if appointment.client != request.user and not _is_admin(request.user):
+            return Response({'detail': 'Non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
+        if appointment.status != 'PENDING':
+            return Response(
+                {'detail': 'Seuls les rendez-vous en attente peuvent être modifiés.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        allowed_fields = {'date', 'time_slot', 'vehicle_info', 'problem_description'}
+        data = {k: v for k, v in request.data.items() if k in allowed_fields}
+        serializer = self.get_serializer(appointment, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    # ── Status transition actions ────────────────────────────────────────────
+
     @action(detail=True, methods=['post'])
     def accept(self, request, pk=None):
+        """Provider or Admin accepts a PENDING appointment."""
         appointment = self.get_object()
-        if appointment.provider != request.user and request.user.role != 'ADMIN':
-            return Response({'detail': 'Non autorisÃ©'}, status=status.HTTP_403_FORBIDDEN)
-        
+        if appointment.provider != request.user and not _is_admin(request.user):
+            return Response({'detail': 'Non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
+        if appointment.status != 'PENDING':
+            return Response({'detail': 'Seul un rendez-vous en attente peut être accepté.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         price = request.data.get('price')
         if price is not None:
-            appointment.price = price
-            
+            try:
+                appointment.price = float(price)
+            except (TypeError, ValueError):
+                return Response({'detail': 'Prix invalide.'}, status=status.HTTP_400_BAD_REQUEST)
+
         appointment.status = 'ACCEPTED'
         appointment.save()
         return Response(AppointmentSerializer(appointment).data)
 
     @action(detail=True, methods=['post'])
-    def cancel(self, request, pk=None):
+    def start(self, request, pk=None):
+        """Provider marks an ACCEPTED appointment as IN_PROGRESS (intervention started)."""
         appointment = self.get_object()
-        if appointment.client != request.user and appointment.provider != request.user and request.user.role != 'ADMIN':
-            return Response({'detail': 'Non autorisÃ©'}, status=status.HTTP_403_FORBIDDEN)
-        
-        appointment.status = 'CANCELLED'
+        if appointment.provider != request.user and not _is_admin(request.user):
+            return Response({'detail': 'Non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
+        if appointment.status != 'ACCEPTED':
+            return Response({'detail': 'Seul un rendez-vous accepté peut être démarré.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        appointment.status = 'IN_PROGRESS'
         appointment.save()
         return Response(AppointmentSerializer(appointment).data)
 
     @action(detail=True, methods=['post'])
     def complete(self, request, pk=None):
+        """Provider closes an IN_PROGRESS appointment as COMPLETED."""
         appointment = self.get_object()
-        if appointment.provider != request.user and request.user.role != 'ADMIN':
-            return Response({'detail': 'Non autorisÃ©'}, status=status.HTTP_403_FORBIDDEN)
-        
+        if appointment.provider != request.user and not _is_admin(request.user):
+            return Response({'detail': 'Non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
+        if appointment.status not in ('ACCEPTED', 'IN_PROGRESS'):
+            return Response({'detail': 'Seul un rendez-vous accepté ou en cours peut être clôturé.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         appointment.status = 'COMPLETED'
         appointment.save()
         return Response(AppointmentSerializer(appointment).data)
 
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        """Client, provider, or Admin can cancel a non-terminal appointment."""
+        appointment = self.get_object()
+        user = request.user
+        if (appointment.client != user and appointment.provider != user
+                and not _is_admin(user)):
+            return Response({'detail': 'Non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
+        if appointment.status in ('COMPLETED', 'CANCELLED'):
+            return Response(
+                {'detail': 'Ce rendez-vous ne peut plus être annulé.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        appointment.status = 'CANCELLED'
+        appointment.save()
+        return Response(AppointmentSerializer(appointment).data)
+
+
+# ─── Review ViewSet ────────────────────────────────────────────────────────────
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Review.objects.all()
+        return Review.objects.all().select_related('client', 'provider', 'appointment')
 
     def perform_create(self, serializer):
         appointment = serializer.validated_data['appointment']
+
         if appointment.client != self.request.user:
-            raise serializers.ValidationError("Vous n'Ãªtes pas autorisÃ© Ã  Ã©valuer ce rendez-vous.")
+            raise serializers.ValidationError(
+                "Vous n'êtes pas autorisé à évaluer ce rendez-vous."
+            )
         if appointment.status != 'COMPLETED':
-            raise serializers.ValidationError("Le rendez-vous doit Ãªtre terminÃ© pour laisser un avis.")
-            
+            raise serializers.ValidationError(
+                "Le rendez-vous doit être terminé pour laisser un avis."
+            )
+        # Guard: prevent duplicate reviews
+        if hasattr(appointment, 'review'):
+            raise serializers.ValidationError(
+                "Un avis a déjà été déposé pour ce rendez-vous."
+            )
+
         serializer.save(client=self.request.user, provider=appointment.provider)
 
         # Recalculate average rating for the provider
         provider = appointment.provider
-        avg_rating = Review.objects.filter(provider=provider).aggregate(Avg('rating'))['rating__avg']
+        avg_rating = (
+            Review.objects.filter(provider=provider)
+            .aggregate(Avg('rating'))['rating__avg']
+        )
         if avg_rating is not None:
-            profile, created = ProviderProfile.objects.get_or_create(user=provider)
+            profile, _ = ProviderProfile.objects.get_or_create(user=provider)
             profile.rating = round(avg_rating, 1)
             profile.save()
 
+
+# ─── Stripe Payment Views ──────────────────────────────────────────────────────
 
 class CreateStripeSessionView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -93,21 +172,33 @@ class CreateStripeSessionView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         appointment_id = request.data.get('appointment_id')
         if not appointment_id:
-            return Response({'error': 'appointment_id est requis'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'appointment_id est requis.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
             appointment = Appointment.objects.get(id=appointment_id)
         except Appointment.DoesNotExist:
-            return Response({'error': 'Rendez-vous introuvable'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Rendez-vous introuvable.'},
+                            status=status.HTTP_404_NOT_FOUND)
 
         if appointment.client != request.user:
-            return Response({'error': 'Non autorisÃ©'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'error': 'Non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
 
         if appointment.status != 'ACCEPTED':
-            return Response({'error': 'Le rendez-vous doit Ãªtre acceptÃ© pour procÃ©der au paiement'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': 'Le rendez-vous doit être accepté pour procéder au paiement.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if appointment.payment_status == 'PAID':
+            return Response({'error': 'Ce rendez-vous a déjà été payé.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         if appointment.price <= 0:
-            return Response({'error': 'Le prix du rendez-vous doit Ãªtre supÃ©rieur Ã  0'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': 'Le prix du rendez-vous doit être supérieur à 0.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             session = stripe.checkout.Session.create(
@@ -116,24 +207,40 @@ class CreateStripeSessionView(generics.CreateAPIView):
                     'price_data': {
                         'currency': 'eur',
                         'product_data': {
-                            'name': f"Service AutoFixMG - {appointment.provider.first_name} {appointment.provider.last_name}",
-                            'description': f"Panne : {appointment.problem_description[:100]} | VÃ©hicule : {appointment.vehicle_info}",
+                            'name': (
+                                f"Service AutoFixMG – "
+                                f"{appointment.provider.first_name} {appointment.provider.last_name}"
+                            ),
+                            'description': (
+                                f"Panne : {appointment.problem_description[:100]} | "
+                                f"Véhicule : {appointment.vehicle_info}"
+                            ),
                         },
                         'unit_amount': int(appointment.price * 100),
                     },
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url=f"{settings.FRONTEND_URL}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&appointment_id={appointment.id}",
+                # {CHECKOUT_SESSION_ID} is a Stripe template literal — must stay as-is
+                success_url=(
+                    f"{settings.FRONTEND_URL}/payment/success"
+                    f"?session_id={{CHECKOUT_SESSION_ID}}&appointment_id={appointment.id}"
+                ),
                 cancel_url=f"{settings.FRONTEND_URL}/payment/cancel",
+                metadata={
+                    'appointment_id': str(appointment.id),
+                    'client_id': str(appointment.client.id),
+                },
             )
 
             appointment.stripe_session_id = session.id
             appointment.save()
 
             return Response({'checkout_url': session.url})
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except stripe.error.StripeError as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_502_BAD_GATEWAY)
+        except Exception as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class VerifyPaymentView(generics.GenericAPIView):
@@ -144,20 +251,27 @@ class VerifyPaymentView(generics.GenericAPIView):
         appointment_id = request.query_params.get('appointment_id')
 
         if not session_id or not appointment_id:
-            return Response({'error': 'session_id et appointment_id sont requis'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'session_id et appointment_id sont requis.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
             appointment = Appointment.objects.get(id=appointment_id, stripe_session_id=session_id)
-            if appointment.client != request.user:
-                return Response({'error': 'Non autorisÃ©'}, status=status.HTTP_403_FORBIDDEN)
+        except Appointment.DoesNotExist:
+            return Response({'error': 'Session introuvable ou incohérente.'},
+                            status=status.HTTP_404_NOT_FOUND)
 
+        if appointment.client != request.user:
+            return Response({'error': 'Non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
             session = stripe.checkout.Session.retrieve(session_id)
             if session.payment_status == 'paid':
                 appointment.payment_status = 'PAID'
                 appointment.save()
-                return Response({'status': 'PAID', 'message': 'Paiement validÃ© avec succÃ¨s.'})
+                return Response({'status': 'PAID', 'message': 'Paiement validé avec succès.'})
             else:
-                return Response({'status': 'UNPAID', 'message': 'Le paiement n\'a pas encore Ã©tÃ© effectuÃ©.'})
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+                return Response({'status': 'UNPAID', 'message': "Le paiement n'a pas encore été effectué."})
+        except stripe.error.StripeError as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_502_BAD_GATEWAY)
+        except Exception as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

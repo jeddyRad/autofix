@@ -7,8 +7,9 @@ class Appointment(models.Model):
     STATUS_CHOICES = (
         ('PENDING', 'En attente'),
         ('ACCEPTED', 'Accepté'),
-        ('CANCELLED', 'Annulé'),
+        ('IN_PROGRESS', 'En cours'),
         ('COMPLETED', 'Terminé'),
+        ('CANCELLED', 'Annulé'),
     )
 
     PAYMENT_CHOICES = (
