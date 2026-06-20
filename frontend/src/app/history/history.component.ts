@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HistoryService } from '../services/history.service';
+import { timer, Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-history',
@@ -10,10 +11,11 @@ import { HistoryService } from '../services/history.service';
     templateUrl: './history.component.html',
     styleUrl: './history.component.css'
 })
-export class HistoryComponent implements OnInit {
+export class HistoryComponent implements OnInit, OnDestroy {
     appointments: any[] = [];
     isLoading = false;
     filters = { status: '', date_from: '', date_to: '' };
+    private pollingSub!: Subscription;
 
     STATUSES = [
         { value: '', label: 'Tous les statuts' },
@@ -26,13 +28,31 @@ export class HistoryComponent implements OnInit {
 
     constructor(private historyService: HistoryService) { }
 
-    ngOnInit() { this.load(); }
+    ngOnInit() {
+        this.load();
+        this.pollingSub = timer(10000, 10000).subscribe(() => {
+            this.silentLoad();
+        });
+    }
+
+    ngOnDestroy() {
+        if (this.pollingSub) {
+            this.pollingSub.unsubscribe();
+        }
+    }
 
     load() {
         this.isLoading = true;
         this.historyService.getHistory(this.filters).subscribe({
             next: (data: any[]) => { this.appointments = data; this.isLoading = false; },
             error: () => this.isLoading = false
+        });
+    }
+
+    silentLoad() {
+        this.historyService.getHistory(this.filters).subscribe({
+            next: (data: any[]) => { this.appointments = data; },
+            error: () => { }
         });
     }
 

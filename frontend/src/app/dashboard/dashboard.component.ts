@@ -8,6 +8,7 @@ import { PaymentService } from '../services/payment.service';
 import { ToastService } from '../shared/toast.service';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../config/api.config';
+import { timer, Subscription } from 'rxjs';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faClipboardList, faCheckCircle, faTrophy, faTimesCircle, faCalendarAlt, faCreditCard, faStar, faWallet, faChartLine } from '@fortawesome/free-solid-svg-icons';
 
@@ -40,6 +41,8 @@ export class DashboardComponent implements OnInit {
   isLoading = true;
   activeTab = 'appointments';
 
+  private pollingSub!: Subscription;
+
   // Provider action modals
   priceInput = 0;
   actionAppointment: any = null;
@@ -60,9 +63,22 @@ export class DashboardComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    // Initial fetch to show loading spinner
     this.loadAppointments();
+
+    // Auto sync without loading spinners every 10 seconds
+    this.pollingSub = timer(10000, 10000).subscribe(() => {
+      this.silentLoadAppointments();
+    });
+
     if (this.role === 'PROVIDER') {
       this.loadProviderStats();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollingSub) {
+      this.pollingSub.unsubscribe();
     }
   }
 
@@ -84,6 +100,15 @@ export class DashboardComponent implements OnInit {
         console.error(err);
         this.isLoading = false;
       }
+    });
+  }
+
+  silentLoadAppointments(): void {
+    this.appointmentService.getAppointments().subscribe({
+      next: (data) => {
+        this.appointments = data;
+      },
+      error: (err) => console.error('Erreur silent sync', err)
     });
   }
 
