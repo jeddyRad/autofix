@@ -86,10 +86,14 @@ class ProviderListView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
+        from django.db.models.expressions import RawSQL
         queryset = User.objects.filter(role='PROVIDER').select_related('provider_profile')
         city = self.request.query_params.get('city')
         specialty = self.request.query_params.get('specialty')
         search = self.request.query_params.get('search')
+        lat = self.request.query_params.get('lat')
+        lng = self.request.query_params.get('lng')
+        radius = self.request.query_params.get('radius', 50)  # km, default 50
 
         if city:
             queryset = queryset.filter(city__icontains=city)
@@ -102,7 +106,37 @@ class ProviderListView(generics.ListAPIView):
                 models.Q(provider_profile__business_name__icontains=search) |
                 models.Q(provider_profile__bio__icontains=search)
             )
+
+        # ── Geolocation filter (Haversine, SQL pur — sans PostGIS) ──────────────
+        if lat and lng:
+            try:
+                lat_f = float(lat)
+                lng_f = float(lng)
+                radius_f = float(radius)
+            except (ValueError, TypeError):
+                return queryset
+
+            # Haversine formula in raw SQL (PostgreSQL math functions)
+            haversine_sql = """
+                6371.0 * 2.0 * ASIN(SQRT(
+                    POWER(SIN(RADIANS((accounts_providerprofile.latitude - %s) / 2.0)), 2)
+                    + COS(RADIANS(%s))
+                    * COS(RADIANS(accounts_providerprofile.latitude))
+                    * POWER(SIN(RADIANS((accounts_providerprofile.longitude - %s) / 2.0)), 2)
+                ))
+            """
+            # Only include providers that have coordinates set
+            queryset = queryset.filter(
+                provider_profile__latitude__isnull=False,
+                provider_profile__longitude__isnull=False,
+            ).annotate(
+                distance_km=RawSQL(haversine_sql, (lat_f, lat_f, lng_f))
+            ).filter(
+                distance_km__lte=radius_f
+            ).order_by('distance_km')
+
         return queryset
+
 
 
 class ProviderDetailView(generics.RetrieveAPIView):

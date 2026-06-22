@@ -9,10 +9,20 @@
     <div class="filter-grid">
       <div class="filter-group">
         <label for="search">Rechercher</label>
-        <input type="text" id="search" [(ngModel)]="searchQuery" (ngModelChange)="onFilterChange()" placeholder="Nom, garage, mot-clé...">
+        <input type="text" id="search" [(ngModel)]="searchQuery" (ngModelChange)="onFilterChange()"
+          placeholder="Nom, garage, mot-clé...">
       </div>
-      
-      <div class="filter-group">
+
+      <div class="filter-group geo-group">
+        <label>Géolocalisation</label>
+        <button class="btn btn-geo" (click)="geoActive ? clearGeo() : useMyLocation()"
+          [ngClass]="{'active': geoActive}">
+          <fa-icon [icon]="isGeoLoading ? faSpinner : faLocationArrow" [spin]="isGeoLoading"></fa-icon>
+          {{ geoActive ? 'Position activée (Effacer)' : 'Utiliser ma position' }}
+        </button>
+      </div>
+
+      <div class="filter-group" *ngIf="!geoActive">
         <label for="city">Ville</label>
         <select id="city" [(ngModel)]="selectedCity" (change)="onFilterChange()">
           <option value="">Toutes les villes</option>
@@ -28,10 +38,15 @@
         </select>
       </div>
     </div>
-    
-    <div class="filter-actions" *ngIf="searchQuery || selectedCity || selectedSpecialty">
+
+    <div class="filter-actions" *ngIf="searchQuery || selectedCity || selectedSpecialty || geoActive">
       <button class="btn btn-outline" (click)="resetFilters()">Réinitialiser les filtres</button>
     </div>
+  </div>
+
+  <!-- Geo Error Message -->
+  <div class="geo-error" *ngIf="geoError">
+    <p>{{ geoError }}</p>
   </div>
 
   <!-- Loading State -->
@@ -46,24 +61,32 @@
       <div *ngFor="let provider of providers" class="provider-card">
         <div class="card-header">
           <span class="specialty-badge" [ngClass]="provider.provider_profile?.specialty">
-            {{ provider.provider_profile?.specialty === 'GARAGE' ? 'Garage' : (provider.provider_profile?.specialty === 'DEPANNAGE' ? 'Dépannage' : 'Mécanicien') }}
+            {{ provider.provider_profile?.specialty === 'GARAGE' ? 'Garage' : (provider.provider_profile?.specialty ===
+            'DEPANNAGE' ? 'Dépannage' : 'Mécanicien') }}
           </span>
           <div class="rating">
             <span class="star">★</span>
             <span class="rating-value">{{ provider.provider_profile?.rating || '0.0' }}</span>
           </div>
+          <div class="distance-badge" *ngIf="provider.distance_km != null">
+            <fa-icon [icon]="faLocationArrow"></fa-icon> {{ provider.distance_km | number:'1.0-1' }} km
+          </div>
         </div>
 
         <div class="card-body">
-          <h3 class="business-name">{{ provider.provider_profile?.business_name || provider.first_name + ' ' + provider.last_name }}</h3>
+          <h3 class="business-name">{{ provider.provider_profile?.business_name || provider.first_name + ' ' +
+            provider.last_name }}</h3>
           <p class="provider-name">Par {{ provider.first_name }} {{ provider.last_name }}</p>
-          <p class="location"><span class="icon"><fa-icon [icon]="faMapMarkerAlt"></fa-icon></span> {{ provider.city }} - {{ provider.provider_profile?.address }}</p>
-          <p class="rate"><span class="icon"><fa-icon [icon]="faEuroSign"></fa-icon></span> À partir de <strong>{{ provider.provider_profile?.price_rate || 0 }} €</strong></p>
+          <p class="location"><span class="icon"><fa-icon [icon]="faMapMarkerAlt"></fa-icon></span> {{ provider.city }}
+            - {{ provider.provider_profile?.address }}</p>
+          <p class="rate"><span class="icon"><fa-icon [icon]="faEuroSign"></fa-icon></span> À partir de <strong>{{
+              provider.provider_profile?.price_rate || 0 }} €</strong></p>
           <p class="bio">{{ provider.provider_profile?.bio || 'Aucune description disponible.' }}</p>
         </div>
 
         <div class="card-footer">
-          <button class="btn btn-primary btn-full" [routerLink]="['/providers', provider.id]">Voir profil & Réserver</button>
+          <button class="btn btn-primary btn-full" [routerLink]="['/providers', provider.id]">Voir profil &
+            Réserver</button>
         </div>
       </div>
     </div>

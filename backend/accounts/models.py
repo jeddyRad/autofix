@@ -59,6 +59,8 @@ class ProviderProfile(models.Model):
     bio = models.TextField(blank=True, null=True)
     rating = models.FloatField(default=0.0)
     is_verified = models.BooleanField(default=False)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.business_name} - {self.specialty}"
