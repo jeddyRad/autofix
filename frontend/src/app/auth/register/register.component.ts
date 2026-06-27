@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faCar, faWrench, faSpinner, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { faCar, faWrench, faSpinner, faExclamationTriangle, faLocationArrow, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-register',
@@ -18,6 +18,9 @@ export class RegisterComponent {
   faWrench = faWrench;
   faSpinner = faSpinner;
   faExclamationTriangle = faExclamationTriangle;
+  faLocationArrow = faLocationArrow;
+  faCheckCircle = faCheckCircle;
+
   role: 'CLIENT' | 'PROVIDER' = 'CLIENT';
   first_name = '';
   last_name = '';
@@ -33,6 +36,19 @@ export class RegisterComponent {
   experience_years = 0;
   price_rate = 0;
   bio = '';
+  latitude: number | null = null;
+  longitude: number | null = null;
+
+  // Geolocation state
+  isGeoLoading = false;
+  geoSuccess = false;
+  geoError = '';
+
+  readonly cities = [
+    'Antananarivo', 'Toamasina', 'Mahajanga', 'Fianarantsoa',
+    'Toliara', 'Antsiranana', 'Antsirabe', 'Ambatondrazaka',
+    'Morondava', 'Nosy Be'
+  ];
 
   errorMessage = '';
   isLoading = false;
@@ -68,7 +84,9 @@ export class RegisterComponent {
         specialty: this.specialty,
         experience_years: this.experience_years,
         price_rate: this.price_rate,
-        bio: this.bio
+        bio: this.bio,
+        latitude: this.latitude,
+        longitude: this.longitude
       };
     }
 
@@ -87,6 +105,34 @@ export class RegisterComponent {
         console.error(err);
       }
     });
+  }
+
+  /** Use the browser Geolocation API to capture the provider's GPS coordinates. */
+  async useMyLocation(): Promise<void> {
+    this.isGeoLoading = true;
+    this.geoError = '';
+    this.geoSuccess = false;
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true })
+      );
+      this.latitude = parseFloat(position.coords.latitude.toFixed(6));
+      this.longitude = parseFloat(position.coords.longitude.toFixed(6));
+      this.geoSuccess = true;
+    } catch (err: any) {
+      this.geoError = err.code === 1
+        ? 'Géolocalisation refusée. Activez-la dans votre navigateur.'
+        : 'Impossible de récupérer votre position. Saisissez l\'adresse manuellement.';
+    } finally {
+      this.isGeoLoading = false;
+    }
+  }
+
+  clearGeo(): void {
+    this.latitude = null;
+    this.longitude = null;
+    this.geoSuccess = false;
+    this.geoError = '';
   }
 
   verifyOtp(): void {

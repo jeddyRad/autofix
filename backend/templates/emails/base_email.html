@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AutoFix MG{% endblock %}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f7;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #333;
+        }
+
+        .wrapper {
+            max-width: 600px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff7f00 0%, #e55a00 100%);
+            padding: 32px 40px;
+            text-align: center;
+        }
+
+        .header img {
+            height: 40px;
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            margin: 4px 0 0;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 13px;
+        }
+
+        .content {
+            padding: 36px 40px;
+        }
+
+        .greeting {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+        }
+
+        .body-text {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #444;
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            background: #f8f9ff;
+            border-left: 4px solid #ff7f00;
+            border-radius: 6px;
+            padding: 16px 20px;
+            margin: 24px 0;
+        }
+
+        .info-card .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #888;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .info-card .value {
+            font-size: 15px;
+            color: #1a1a2e;
+            font-weight: 500;
+        }
+
+        .info-card .value+.label {
+            margin-top: 12px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin: 8px 0;
+            padding: 13px 28px;
+            background: #ff7f00;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .btn:hover {
+            background: #e06d00;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #ff7f00;
+            color: #ff7f00 !important;
+        }
+
+        .divider {
+            border: 0;
+            height: 1px;
+            background: #eee;
+            margin: 28px 0;
+        }
+
+        .footer {
+            background: #1a1a2e;
+            padding: 24px 40px;
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.55);
+            line-height: 1.8;
+        }
+
+        .footer a {
+            color: #ff7f00;
+            text-decoration: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-accepted {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-completed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="header">
+            <h1>🔧 AutoFix MG</h1>
+            <p>La plateforme #1 pour l'entretien auto à Madagascar</p>
+        </div>
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+        <div class="footer">
+            <p>© 2025 AutoFix MG — Tous droits réservés<br>
+                <a href="#">Politique de confidentialité</a> &nbsp;·&nbsp;
+                <a href="#">Conditions d'utilisation</a>
+            </p>
+            <p style="margin-top:8px;">Vous recevez cet email car vous êtes inscrit sur <strong
+                    style="color:#ff7f00">AutoFix MG</strong>.</p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,28 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Vérification de votre compte{% endblock %}
+
+{% block header_title %}Code de vérification{% endblock %}
+
+{% block content %}
+<p>Bonjour {{ first_name }},</p>
+
+<p>Bienvenue sur <strong>AutoFix MG</strong>, votre plateforme de confiance pour l'entretien automobile à Madagascar.
+</p>
+
+<p>Pour finaliser la création de votre compte, veuillez utiliser le code de sécurité ci-dessous :</p>
+
+<div class="info-card" style="text-align: center; margin: 30px 0;">
+    <span
+        style="font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 10px;">Votre
+        code</span>
+    <strong style="font-size: 32px; color: #ff7f00; letter-spacing: 4px;">{{ otp }}</strong>
+</div>
+
+<p style="font-size: 13px; color: #666;">
+    Ce code est strictement personnel et expirera dans 10 minutes. Si vous n'êtes pas à l'origine de cette demande, vous
+    pouvez ignorer cet e-mail.
+</p>
+
+<p>À très bientôt sur notre plateforme,<br>L'équipe AutoFix MG</p>
+{% endblock %}

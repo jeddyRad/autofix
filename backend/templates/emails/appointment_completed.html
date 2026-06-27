@@ -1,0 +1,37 @@
+{% extends "emails/base_email.html" %}
+{% block title %}Votre intervention du {{ date }} est terminée – AutoFix MG{% endblock %}
+{% block content %}
+<p class="greeting">Bonjour {{ client_name }},</p>
+<p class="body-text">
+    🏁 L'intervention réalisée par <strong>{{ provider_name }}</strong> sur votre véhicule
+    (<em>{{ vehicle_info }}</em>) le <strong>{{ date }}</strong> est désormais <strong>terminée et clôturée</strong>.
+</p>
+
+<div class="info-card">
+    <div class="label">Date d'intervention</div>
+    <div class="value">{{ date }} &nbsp;·&nbsp; {{ time_slot }}</div>
+    <div class="label">Prestataire</div>
+    <div class="value">{{ provider_name }}</div>
+    <div class="label">Véhicule</div>
+    <div class="value">{{ vehicle_info }}</div>
+    <div class="label">Montant réglé</div>
+    <div class="value" style="font-size:20px;font-weight:700;color:#ff7f00;">{{ price }} Ar</div>
+    <div class="label">Statut</div>
+    <div class="value"><span class="status-badge badge-completed">🏁 Terminé</span></div>
+</div>
+
+<p class="body-text" style="margin-top:24px;">
+    Nous espérons que le service a pleinement répondu à vos attentes. Votre avis est précieux pour nous
+    et pour l'ensemble de la communauté AutoFix MG.
+</p>
+
+<p style="text-align:center;margin-top:20px;">
+    <a class="btn" href="{{ dashboard_url }}">Laisser un avis sur {{ provider_name }}</a>
+</p>
+
+<hr class="divider">
+<p class="body-text" style="font-size:13px;color:#888;text-align:center;">
+    Votre avis aide d'autres automobilistes malgaches à choisir les meilleurs prestataires.<br>
+    Merci de votre confiance et à bientôt sur <strong>AutoFix MG</strong> ! 🙏
+</p>
+{% endblock %}

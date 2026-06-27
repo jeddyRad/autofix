@@ -67,9 +67,20 @@
   display: inline-block;
 }
 
-.specialty-badge.MECANICIEN { background: #e6f7ff; color: #1890ff; }
-.specialty-badge.DEPANNAGE { background: #fff1f0; color: #f5222d; }
-.specialty-badge.GARAGE { background: #f6ffed; color: #52c41a; }
+.specialty-badge.MECANICIEN {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.specialty-badge.DEPANNAGE {
+  background: #fff1f0;
+  color: #f5222d;
+}
+
+.specialty-badge.GARAGE {
+  background: #f6ffed;
+  color: #52c41a;
+}
 
 .profile-details {
   display: grid;
@@ -150,7 +161,8 @@
 }
 
 /* Booking Card */
-.booking-card, .booking-notice-card {
+.booking-card,
+.booking-notice-card {
   background: var(--white);
   border-radius: 16px;
   box-shadow: var(--shadow);
@@ -159,7 +171,8 @@
   top: 100px;
 }
 
-.booking-card h3, .booking-notice-card h3 {
+.booking-card h3,
+.booking-notice-card h3 {
   font-size: 1.4rem;
   color: var(--secondary);
   margin-bottom: 0.5rem;
@@ -203,8 +216,15 @@
   border-color: var(--primary);
 }
 
-.btn-full { width: 100%; text-align: center; }
-.btn-large { padding: 1rem 1.5rem; font-size: 1.05rem; }
+.btn-full {
+  width: 100%;
+  text-align: center;
+}
+
+.btn-large {
+  padding: 1rem 1.5rem;
+  font-size: 1.05rem;
+}
 
 .field-hint {
   font-size: 0.8rem;
@@ -256,9 +276,15 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
+
 /* Stars Display */
 .stars-display {
   display: flex;
@@ -270,7 +296,7 @@
 
 .stars-display fa-icon {
   color: #e2e8f0;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
 }
 
 .stars-display fa-icon.filled {
@@ -289,4 +315,39 @@
   padding: 2rem;
   background: #f8fafc;
   border-radius: 16px;
+}
+
+/* Location Info Card within Booking Form */
+.location-info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background-color: #f8f9fa;
+  border-left: 4px solid var(--primary);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.location-icon {
+  font-size: 1.25rem;
+  color: var(--primary);
+  margin-top: 0.1rem;
+}
+
+.location-details strong {
+  display: block;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.location-details p {
+  color: var(--text);
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.4;
 }

@@ -18,7 +18,7 @@ export class AvailabilityComponent implements OnInit {
     faPlusCircle = faPlusCircle;
     faTrash = faTrash;
     faExclamationCircle = faExclamationCircle;
-    
+
     // Modal Delete
     showDeleteModal = false;
     slotToDelete: number | null = null;
@@ -35,6 +35,8 @@ export class AvailabilityComponent implements OnInit {
 
     newSlot = { weekday: 0, start_time: '09:00', end_time: '17:00' };
     errorMessage = '';
+    successMessage = '';
+    isAddingSlot = false;
 
     constructor(private availabilityService: AvailabilityService) { }
 
@@ -50,13 +52,22 @@ export class AvailabilityComponent implements OnInit {
 
     addSlot() {
         this.errorMessage = '';
+        this.successMessage = '';
         if (this.newSlot.start_time >= this.newSlot.end_time) {
             this.errorMessage = 'L\'heure de fin doit être après l\'heure de début.';
             return;
         }
+        this.isAddingSlot = true;
         this.availabilityService.addSlot(this.newSlot).subscribe({
-            next: () => this.loadSlots(),
+            next: () => {
+                this.isAddingSlot = false;
+                this.successMessage = 'Créneau ajouté avec succès !';
+                this.newSlot = { weekday: 0, start_time: '09:00', end_time: '17:00' };
+                this.loadSlots();
+                setTimeout(() => this.successMessage = '', 3500);
+            },
             error: (err: any) => {
+                this.isAddingSlot = false;
                 this.errorMessage = err?.error?.non_field_errors?.[0] || 'Erreur lors de l\'ajout.';
             }
         });

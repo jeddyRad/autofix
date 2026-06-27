@@ -1,0 +1,33 @@
+{% extends "emails/base_email.html" %}
+{% block title %}Annulation de rendez-vous – AutoFix MG{% endblock %}
+{% block content %}
+<p class="greeting">Bonjour,</p>
+<p class="body-text">
+    Nous vous informons que le rendez-vous prévu le <strong>{{ date }}</strong> à <strong>{{ time_slot }}</strong>
+    a été <strong>annulé</strong> par <strong>{{ cancelled_by }}</strong>.
+</p>
+
+<div class="info-card">
+    <div class="label">Date annulée</div>
+    <div class="value">{{ date }} &nbsp;·&nbsp; {{ time_slot }}</div>
+    <div class="label">Annulé par</div>
+    <div class="value">{{ cancelled_by }}</div>
+    <div class="label">Client</div>
+    <div class="value">{{ client_name }}</div>
+    <div class="label">Prestataire</div>
+    <div class="value">{{ provider_name }}</div>
+    <div class="label">Véhicule concerné</div>
+    <div class="value">{{ vehicle_info }}</div>
+    <div class="label">Statut</div>
+    <div class="value"><span class="status-badge badge-cancelled">❌ Annulé</span></div>
+</div>
+
+<p class="body-text">
+    Si vous souhaitez <strong>reprogrammer</strong> cette intervention ou prendre un nouveau rendez-vous,
+    vous pouvez le faire à tout moment via la plateforme AutoFix MG.
+</p>
+
+<p style="text-align:center;margin-top:28px;">
+    <a class="btn" href="{{ providers_url }}">Trouver un prestataire</a>
+</p>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "emails/base_email.html" %}
+{% block title %}Nouvelle demande d'intervention – AutoFix MG{% endblock %}
+{% block content %}
+<p class="greeting">Bonjour {{ provider_name }},</p>
+<p class="body-text">
+    Vous avez reçu une nouvelle demande d'intervention de la part de <strong>{{ client_name }}</strong>.
+    Connectez-vous à votre tableau de bord pour consulter les détails, l'accepter et proposer votre tarif.
+</p>
+
+<div class="info-card">
+    <div class="label">Date souhaitée</div>
+    <div class="value">{{ date }} &nbsp;·&nbsp; {{ time_slot }}</div>
+    <div class="label">Client</div>
+    <div class="value">{{ client_name }}</div>
+    <div class="label">Véhicule</div>
+    <div class="value">{{ vehicle_info }}</div>
+    <div class="label">Problème signalé</div>
+    <div class="value">{{ problem_description }}</div>
+    <div class="label">Statut</div>
+    <div class="value"><span class="status-badge badge-pending">⏳ En attente de votre réponse</span></div>
+</div>
+
+<p style="text-align:center;margin-top:28px;">
+    <a class="btn" href="{{ dashboard_url }}">Voir la demande sur mon tableau de bord</a>
+</p>
+
+<hr class="divider">
+<p class="body-text" style="font-size:13px;color:#888;">
+    Répondez rapidement : les clients choisissent souvent le premier prestataire disponible.
+    Si vous ne pouvez pas assurer ce rendez-vous, vous pouvez le décliner depuis votre espace.
+</p>
+{% endblock %}

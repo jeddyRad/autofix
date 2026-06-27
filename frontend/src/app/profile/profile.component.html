@@ -28,8 +28,10 @@
 
         <div class="form-group">
           <label for="email">Adresse email</label>
-          <input type="email" id="email" name="email" [(ngModel)]="profileData.email" required disabled class="disabled">
-          <small><fa-icon [icon]="faLock"></fa-icon> Votre email ne peut pas être modifié pour des raisons de sécurité.</small>
+          <input type="email" id="email" name="email" [(ngModel)]="profileData.email" required disabled
+            class="disabled">
+          <small><fa-icon [icon]="faLock"></fa-icon> Votre email ne peut pas être modifié pour des raisons de
+            sécurité.</small>
         </div>
 
         <div class="form-group">
@@ -39,7 +41,10 @@
 
         <div class="form-group">
           <label for="city">Ville de résidence</label>
-          <input type="text" id="city" name="city" [(ngModel)]="profileData.city">
+          <select id="city" name="city" [(ngModel)]="profileData.city">
+            <option value="">-- Choisir une ville --</option>
+            <option *ngFor="let c of cities" [value]="c">{{ c }}</option>
+          </select>
         </div>
       </div>
 
@@ -49,7 +54,8 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="business_name">Nom commercial / Garage</label>
-            <input type="text" id="business_name" name="business_name" [(ngModel)]="profileData.provider_profile.business_name" required>
+            <input type="text" id="business_name" name="business_name"
+              [(ngModel)]="profileData.provider_profile.business_name" required>
           </div>
 
           <div class="form-group">
@@ -63,12 +69,14 @@
 
           <div class="form-group">
             <label for="experience_years">Expérience (années)</label>
-            <input type="number" id="experience_years" name="experience_years" [(ngModel)]="profileData.provider_profile.experience_years" min="0">
+            <input type="number" id="experience_years" name="experience_years"
+              [(ngModel)]="profileData.provider_profile.experience_years" min="0">
           </div>
 
           <div class="form-group">
             <label for="price_rate">Tarif horaire moyen (Ar)</label>
-            <input type="number" id="price_rate" name="price_rate" [(ngModel)]="profileData.provider_profile.price_rate" min="0">
+            <input type="number" id="price_rate" name="price_rate" [(ngModel)]="profileData.provider_profile.price_rate"
+              min="0">
           </div>
         </div>
 
@@ -77,9 +85,34 @@
           <input type="text" id="address" name="address" [(ngModel)]="profileData.provider_profile.address">
         </div>
 
+        <!-- Geolocation capture -->
+        <div class="form-group full-width">
+          <label>Coordonnées GPS du garage <span class="optional-badge">(recommandé)</span></label>
+          <div class="geo-capture-box">
+            <button type="button" class="btn btn-geo" [class.is-done]="geoSuccess" [disabled]="isGeoLoading"
+              (click)="geoSuccess ? clearGeo() : useMyLocation()">
+              <fa-icon [icon]="isGeoLoading ? faSpinner : (geoSuccess ? faCheckCircle : faLocationArrow)"
+                [spin]="isGeoLoading"></fa-icon>
+              <span>{{ isGeoLoading ? 'Localisation...' : geoSuccess ? 'Position enregistrée — Cliquer pour
+                réinitialiser' : 'Utiliser ma position actuelle' }}</span>
+            </button>
+            <div class="geo-coords" *ngIf="geoSuccess && profileData.provider_profile.latitude">
+              📍 Lat : {{ profileData.provider_profile.latitude | number:'1.4-6' }} &nbsp;|&nbsp; Lng : {{
+              profileData.provider_profile.longitude | number:'1.4-6' }}
+            </div>
+            <p class="field-hint" *ngIf="!geoSuccess">
+              Permet aux clients de vous trouver via la recherche de proximité. Cliquez pour actualiser votre position.
+            </p>
+            <p class="error-msg" *ngIf="geoError">
+              <fa-icon [icon]="faExclamationTriangle"></fa-icon> {{ geoError }}
+            </p>
+          </div>
+        </div>
+
         <div class="form-group full-width">
           <label for="bio">Présentation professionnelle (Bio)</label>
-          <textarea id="bio" name="bio" [(ngModel)]="profileData.provider_profile.bio" rows="5" placeholder="Décrivez vos compétences..."></textarea>
+          <textarea id="bio" name="bio" [(ngModel)]="profileData.provider_profile.bio" rows="5"
+            placeholder="Décrivez vos compétences..."></textarea>
         </div>
       </div>
 

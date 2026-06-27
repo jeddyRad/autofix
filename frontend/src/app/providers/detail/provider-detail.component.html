@@ -14,7 +14,8 @@
           <div class="avatar shadow-sm"><fa-icon [icon]="faWrench"></fa-icon></div>
           <div class="profile-title">
             <span class="specialty-badge" [ngClass]="provider.provider_profile?.specialty">
-              {{ provider.provider_profile?.specialty === 'GARAGE' ? 'Garage multiservices' : (provider.provider_profile?.specialty === 'DEPANNAGE' ? 'Dépannage & Remorquage' : 'Mécanicien expert') }}
+              {{ provider.provider_profile?.specialty === 'GARAGE' ? 'Garage multiservices' :
+              (provider.provider_profile?.specialty === 'DEPANNAGE' ? 'Dépannage & Remorquage' : 'Mécanicien expert') }}
             </span>
             <h2>{{ provider.provider_profile?.business_name || provider.first_name + ' ' + provider.last_name }}</h2>
             <p class="provider-owner">Dirigé par {{ provider.first_name }} {{ provider.last_name }}</p>
@@ -70,12 +71,11 @@
         <div class="reviews-list">
           <div class="rating-overview">
             <div class="stars-display">
-              <fa-icon *ngFor="let s of getStars(provider.provider_profile?.rating)" 
-                       [icon]="faStar" 
-                       [class.filled]="s === 1" 
-                       [class.empty]="s === 0"></fa-icon>
+              <fa-icon *ngFor="let s of getStars(provider.provider_profile?.rating)" [icon]="faStar"
+                [class.filled]="s === 1" [class.empty]="s === 0"></fa-icon>
             </div>
-            <p>Ce prestataire dispose d'une note globale de <strong>{{ provider.provider_profile?.rating || '0.0' }} / 5</strong>.</p>
+            <p>Ce prestataire dispose d'une note globale de <strong>{{ provider.provider_profile?.rating || '0.0' }} /
+                5</strong>.</p>
             <p class="text-muted">Les avis détaillés apparaîtront prochainement.</p>
           </div>
         </div>
@@ -84,7 +84,8 @@
 
     <!-- Right Column: Booking Form -->
     <div class="sidebar-column animate-fade-up" style="animation-delay: 0.1s;">
-      <div *ngIf="authService.currentUser()?.id === provider.id; else bookingCard" class="booking-notice-card card glass-panel">
+      <div *ngIf="authService.currentUser()?.id === provider.id; else bookingCard"
+        class="booking-notice-card card glass-panel">
         <h3>Votre propre profil</h3>
         <p>Ceci est votre vitrine publique. Vous pouvez gérer vos interventions depuis votre tableau de bord.</p>
         <button class="btn btn-primary btn-full shadow-hover" routerLink="/dashboard">Voir mes interventions</button>
@@ -98,9 +99,20 @@
           <div *ngIf="bookingSuccess" class="success-banner animate-fade-in">
             <fa-icon [icon]="faCheckCircle"></fa-icon> Demande transmise avec succès !
           </div>
-          
+
           <div *ngIf="bookingError" class="error-banner animate-fade-in">
             <fa-icon [icon]="faExclamationTriangle"></fa-icon> {{ bookingError }}
+          </div>
+
+          <!-- Location Info Card -->
+          <div class="location-info-card animate-fade-in" *ngIf="provider?.provider_profile">
+            <div class="location-icon">
+              <fa-icon [icon]="faMapMarkerAlt"></fa-icon>
+            </div>
+            <div class="location-details">
+              <strong>Lieu d'intervention</strong>
+              <p>{{ provider.provider_profile.address }}, {{ provider.city }}</p>
+            </div>
           </div>
 
           <form (ngSubmit)="onBook()" class="animate-fade-in">
@@ -117,18 +129,21 @@
                 <option *ngFor="let slot of timeSlots" [value]="slot">{{ slot }}</option>
               </select>
               <p class="field-hint" *ngIf="date && timeSlots.length === 0">
-                <fa-icon [icon]="faExclamationTriangle"></fa-icon> Ce prestataire n'a pas configuré de disponibilités pour ce jour.
+                <fa-icon [icon]="faExclamationTriangle"></fa-icon> Ce prestataire n'a pas configuré de disponibilités
+                pour ce jour.
               </p>
             </div>
 
             <div class="form-group">
               <label><fa-icon [icon]="faCar"></fa-icon> Votre véhicule</label>
-              <input type="text" name="vehicle_info" [(ngModel)]="vehicleInfo" placeholder="Marque, modèle et immatriculation" required>
+              <input type="text" name="vehicle_info" [(ngModel)]="vehicleInfo"
+                placeholder="Marque, modèle et immatriculation" required>
             </div>
 
             <div class="form-group">
               <label><fa-icon [icon]="faTools"></fa-icon> Description du besoin</label>
-              <textarea name="problem_description" [(ngModel)]="problemDescription" rows="5" placeholder="Décrivez les symptômes ou le service demandé..." required></textarea>
+              <textarea name="problem_description" [(ngModel)]="problemDescription" rows="5"
+                placeholder="Décrivez les symptômes ou le service demandé..." required></textarea>
             </div>
 
             <button type="submit" class="btn btn-primary btn-full btn-large shadow-hover" [disabled]="isBookingLoading">

@@ -1,0 +1,31 @@
+{% extends "emails/base_email.html" %}
+{% block title %}Confirmation d'acceptation de rendez-vous – AutoFix MG{% endblock %}
+{% block content %}
+<p class="greeting">Bonjour {{ provider_name }},</p>
+<p class="body-text">
+    Vous avez <strong>accepté</strong> de prendre en charge une intervention. Voici le récapitulatif complet.
+    Après paiement du client, l'intervention sera confirmée définitivement.
+</p>
+
+<div class="info-card">
+    <div class="label">Date planifiée</div>
+    <div class="value">{{ date }} &nbsp;·&nbsp; {{ time_slot }}</div>
+    <div class="label">Client</div>
+    <div class="value">{{ client_name }}</div>
+    <div class="label">Véhicule</div>
+    <div class="value">{{ vehicle_info }}</div>
+    <div class="label">Problème signalé</div>
+    <div class="value">{{ problem_description }}</div>
+    <div class="label">Tarif proposé</div>
+    <div class="value" style="font-size:20px;font-weight:700;color:#ff7f00;">{{ price }} Ar</div>
+</div>
+
+<p class="body-text" style="margin-top:20px;">
+    📌 <strong>À noter :</strong> pensez à mettre à jour le statut de l'intervention depuis votre tableau de bord
+    une fois l'opération commencée. Cela permet au client de suivre en temps réel l'avancement.
+</p>
+
+<p style="text-align:center;margin-top:28px;">
+    <a class="btn" href="{{ dashboard_url }}">Voir mes interventions</a>
+</p>
+{% endblock %}

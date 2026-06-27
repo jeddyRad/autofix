@@ -25,19 +25,21 @@
                 <input type="time" [(ngModel)]="newSlot.end_time">
             </div>
             <div class="form-group" style="justify-content: flex-end;">
-                <button class="btn btn-primary shadow-hover" (click)="addSlot()">
-                    {{ isLoading ? '...' : '+ Ajouter au planning' }}
+                <button class="btn btn-primary shadow-hover" (click)="addSlot()" [disabled]="isAddingSlot || isLoading">
+                    {{ isAddingSlot ? 'Ajout en cours...' : '+ Ajouter au planning' }}
                 </button>
             </div>
         </div>
-        <p *ngIf="errorMessage" class="error-msg animate-fade-in"><fa-icon [icon]="faExclamationCircle"></fa-icon> {{ errorMessage }}</p>
+        <p *ngIf="errorMessage" class="error-msg animate-fade-in"><fa-icon [icon]="faExclamationCircle"></fa-icon> {{
+            errorMessage }}</p>
+        <p *ngIf="successMessage" class="success-msg animate-fade-in">✅ {{ successMessage }}</p>
     </div>
 
     <!-- Weekly Grid -->
     <div *ngIf="isLoading" class="loading-container">
         <div class="spinner"></div>
     </div>
-    
+
     <div *ngIf="!isLoading" class="week-grid animate-fade-up" style="animation-delay: 0.2s;">
         <div *ngFor="let day of WEEKDAYS" class="day-column">
             <div class="day-header">{{ day.label }}</div>

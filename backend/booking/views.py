@@ -4,6 +4,7 @@ import logging
 from django.conf import settings
 from django.core.mail import send_mail
 from django.http import HttpResponse
+from django.template.loader import render_to_string
 from rest_framework import viewsets, status, generics, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -19,13 +20,18 @@ logger = logging.getLogger(__name__)
 
 # ─── Email Helpers ────────────────────────────────────────────────────────────
 
-def _notify_appointment(subject: str, body: str, *recipients):
-    """Send notification email to one or more recipients, failing silently."""
+def _notify_appointment(subject: str, body: str, *recipients, html_message: str = ''):
+    """Send notification email (plain text + optional HTML) to one or more recipients."""
     emails = [e for e in recipients if e]
     if not emails:
         return
     try:
-        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, emails, fail_silently=False)
+        send_mail(
+            subject, body,
+            settings.DEFAULT_FROM_EMAIL, emails,
+            fail_silently=False,
+            html_message=html_message or None,
+        )
     except Exception as exc:
         logger.error('[Notification] Envoi email échoué : %s', exc)
 
@@ -67,22 +73,31 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         appointment = serializer.save(client=self.request.user, status='PENDING')
-        
-        # ── Email notification to Provider ──
+
         provider_name = f"{appointment.provider.first_name} {appointment.provider.last_name}"
         client_name = f"{appointment.client.first_name} {appointment.client.last_name}"
+
+        ctx = {
+            'provider_name': provider_name,
+            'client_name': client_name,
+            'date': appointment.date,
+            'time_slot': appointment.time_slot,
+            'vehicle_info': appointment.vehicle_info,
+            'problem_description': appointment.problem_description,
+            'dashboard_url': f"{settings.FRONTEND_URL}/dashboard",
+        }
+        html_body = render_to_string('emails/appointment_created.html', ctx)
+
         _notify_appointment(
             f"🔔 Nouvelle demande d'intervention – AutoFix MG",
             (
                 f"Bonjour {provider_name},\n\n"
-                f"Vous avez reçu une nouvelle demande d'intervention de la part de {client_name} pour le {appointment.date} ({appointment.time_slot}).\n\n"
-                f"Détails du véhicule : {appointment.vehicle_info}\n"
-                f"Problème signalé : {appointment.problem_description}\n\n"
-                f"Veuillez vous connecter à votre tableau de bord AutoFix MG pour consulter les détails de cette demande, l'accepter et proposer votre tarif d'intervention.\n\n"
-                f"Cordialement,\n"
-                f"L'équipe AutoFix MG"
+                f"Vous avez reçu une nouvelle demande d'intervention de {client_name} pour le {appointment.date} ({appointment.time_slot}).\n"
+                f"Véhicule : {appointment.vehicle_info}\nProblème : {appointment.problem_description}\n\n"
+                f"Connectez-vous sur AutoFix MG pour consulter et accepter la demande."
             ),
             appointment.provider.email,
+            html_message=html_body,
         )
 
     def partial_update(self, request, *args, **kwargs):
@@ -160,38 +175,41 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         appointment.status = 'ACCEPTED'
         appointment.save()
 
-        # ── Email notification ──
         provider_name = f"{appointment.provider.first_name} {appointment.provider.last_name}"
         client_name = f"{appointment.client.first_name} {appointment.client.last_name}"
+        base_ctx = {
+            'provider_name': provider_name,
+            'client_name': client_name,
+            'date': appointment.date,
+            'time_slot': appointment.time_slot,
+            'vehicle_info': appointment.vehicle_info,
+            'problem_description': appointment.problem_description,
+            'price': appointment.price,
+            'dashboard_url': f"{settings.FRONTEND_URL}/dashboard",
+        }
+
+        # Email to client
+        html_client = render_to_string('emails/appointment_accepted_client.html', base_ctx)
         _notify_appointment(
             f"✅ Votre rendez-vous du {appointment.date} a été accepté – AutoFix MG",
             (
-                f"Bonjour {client_name},\n\n"
-                f"Excellente nouvelle ! Votre demande de rendez-vous pour le {appointment.date} ({appointment.time_slot}) a été acceptée par le prestataire {provider_name}.\n\n"
-                f"Détails de l'intervention :\n"
-                f"- Prestataire : {provider_name}\n"
-                f"- Tarif convenu : {appointment.price} Ar\n\n"
-                f"Vous pouvez désormais procéder au paiement sécurisé via votre tableau de bord (Espace Client) pour confirmer définitivement l'intervention.\n\n"
-                f"Merci de votre confiance,\n"
-                f"L'équipe AutoFix MG"
+                f"Bonjour {client_name},\n\nVotre rendez-vous du {appointment.date} ({appointment.time_slot}) a été accepté par {provider_name}.\n"
+                f"Tarif convenu : {appointment.price} Ar.\n\nConnectez-vous pour procéder au paiement."
             ),
             appointment.client.email,
+            html_message=html_client,
         )
+
+        # Email to provider
+        html_provider = render_to_string('emails/appointment_accepted_provider.html', base_ctx)
         _notify_appointment(
             f"📋 Confirmation d'acceptation de rendez-vous – AutoFix MG",
             (
-                f"Bonjour {provider_name},\n\n"
-                f"Vous avez accepté de prendre en charge le véhicule de {client_name} pour le {appointment.date} ({appointment.time_slot}).\n\n"
-                f"Récapitulatif de la demande :\n"
-                f"- Client : {client_name}\n"
-                f"- Véhicule : {appointment.vehicle_info}\n"
-                f"- Descriptif du problème : {appointment.problem_description}\n"
-                f"- Tarif proposé : {appointment.price} Ar\n\n"
-                f"N'oubliez pas de mettre à jour le statut de l'intervention via votre tableau de bord une fois l'opération commencée.\n\n"
-                f"Bonne intervention,\n"
-                f"L'équipe AutoFix MG"
+                f"Bonjour {provider_name},\n\nVous avez accepté l'intervention de {client_name} le {appointment.date} ({appointment.time_slot}).\n"
+                f"Tarif proposé : {appointment.price} Ar."
             ),
             appointment.provider.email,
+            html_message=html_provider,
         )
 
         return Response(AppointmentSerializer(appointment).data)
@@ -221,19 +239,26 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         appointment.status = 'COMPLETED'
         appointment.save()
 
-        # ── Email notification ──
         client_name = f"{appointment.client.first_name} {appointment.client.last_name}"
         provider_name = f"{appointment.provider.first_name} {appointment.provider.last_name}"
+        ctx = {
+            'client_name': client_name,
+            'provider_name': provider_name,
+            'date': appointment.date,
+            'time_slot': appointment.time_slot,
+            'vehicle_info': appointment.vehicle_info,
+            'price': appointment.price,
+            'dashboard_url': f"{settings.FRONTEND_URL}/dashboard",
+        }
+        html_body = render_to_string('emails/appointment_completed.html', ctx)
         _notify_appointment(
             f"🏁 Votre intervention du {appointment.date} est terminée – AutoFix MG",
             (
-                f"Bonjour {client_name},\n\n"
-                f"L'intervention réalisée par {provider_name} sur votre véhicule le {appointment.date} est désormais terminée et clôturée.\n\n"
-                f"Nous espérons que le service a pleinement répondu à vos attentes. Votre avis est précieux pour nous et pour l'ensemble de la communauté AutoFix MG : nous vous invitons à laisser une note et un commentaire au prestataire depuis votre espace client.\n\n"
-                f"Merci de votre confiance et à bientôt,\n"
-                f"L'équipe AutoFix MG"
+                f"Bonjour {client_name},\n\nL'intervention de {provider_name} sur votre véhicule le {appointment.date} est terminée.\n"
+                f"Merci de laisser un avis sur la plateforme AutoFix MG."
             ),
             appointment.client.email,
+            html_message=html_body,
         )
 
         return Response(AppointmentSerializer(appointment).data)
@@ -254,19 +279,29 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         appointment.status = 'CANCELLED'
         appointment.save()
 
-        # ── Email notification ──
         cancelled_by = f"{user.first_name} {user.last_name}"
+        client_name = f"{appointment.client.first_name} {appointment.client.last_name}"
+        provider_name = f"{appointment.provider.first_name} {appointment.provider.last_name}"
+        ctx = {
+            'cancelled_by': cancelled_by,
+            'client_name': client_name,
+            'provider_name': provider_name,
+            'date': appointment.date,
+            'time_slot': appointment.time_slot,
+            'vehicle_info': appointment.vehicle_info,
+            'providers_url': f"{settings.FRONTEND_URL}/providers",
+        }
+        html_body = render_to_string('emails/appointment_cancelled.html', ctx)
+        plain = (
+            f"Bonjour,\n\nLe rendez-vous du {appointment.date} à {appointment.time_slot} a été annulé par {cancelled_by}.\n"
+            f"Vous pouvez reprogrammer à tout moment sur AutoFix MG."
+        )
         _notify_appointment(
             f"❌ Annulation de rendez-vous : {appointment.date} – AutoFix MG",
-            (
-                f"Bonjour,\n\n"
-                f"Nous vous informons par la présente que le rendez-vous prévu le {appointment.date} à {appointment.time_slot} a été annulé par {cancelled_by}.\n\n"
-                f"Si vous souhaitez reprogrammer cette intervention ou prendre un nouveau rendez-vous, vous pouvez le faire à tout moment via la plateforme AutoFix MG.\n\n"
-                f"Cordialement,\n"
-                f"L'équipe AutoFix MG"
-            ),
+            plain,
             appointment.client.email,
             appointment.provider.email,
+            html_message=html_body,
         )
 
         return Response(AppointmentSerializer(appointment).data)

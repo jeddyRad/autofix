@@ -20,7 +20,8 @@
         {{ isLoading ? 'Vérification...' : "Valider mon compte" }}
       </button>
       <div class="resend-otp-container" style="margin-top: 1.5rem; text-align: center;">
-        <p style="margin-bottom: 0.5rem; font-size: 0.95rem; color: var(--text-muted);">Vous n'avez pas reçu le code ?</p>
+        <p style="margin-bottom: 0.5rem; font-size: 0.95rem; color: var(--text-muted);">Vous n'avez pas reçu le code ?
+        </p>
         <button type="button" class="btn btn-link" (click)="resendOtp()" [disabled]="isLoading"
           style="font-weight: 700; color: var(--primary); text-decoration: none; cursor: pointer;">
           Renvoyer un nouveau code
@@ -65,7 +66,8 @@
 
       <div class="form-group">
         <label for="password">Mot de passe</label>
-        <input type="password" id="password" name="password" [(ngModel)]="password" placeholder="Minimum 8 caractères" required>
+        <input type="password" id="password" name="password" [(ngModel)]="password" placeholder="Minimum 8 caractères"
+          required>
       </div>
 
       <div class="form-row">
@@ -75,7 +77,10 @@
         </div>
         <div class="form-group">
           <label for="city">Ville de résidence</label>
-          <input type="text" id="city" name="city" [(ngModel)]="city" placeholder="Ex: Antananarivo">
+          <select id="city" name="city" [(ngModel)]="city">
+            <option value="">-- Choisir une ville --</option>
+            <option *ngFor="let c of cities" [value]="c">{{ c }}</option>
+          </select>
         </div>
       </div>
 
@@ -94,6 +99,29 @@
           <label for="address">Adresse du garage / Atelier</label>
           <input type="text" id="address" name="address" [(ngModel)]="address" placeholder="Rue, Quartier, Lot..."
             required>
+        </div>
+
+        <!-- Geolocation capture -->
+        <div class="form-group full-width">
+          <label>Coordonnées GPS du garage <span class="optional-badge">(recommandé)</span></label>
+          <div class="geo-capture-box">
+            <button type="button" class="btn btn-geo" [class.is-capturing]="isGeoLoading" [class.is-done]="geoSuccess"
+              (click)="geoSuccess ? clearGeo() : useMyLocation()" [disabled]="isGeoLoading">
+              <fa-icon [icon]="isGeoLoading ? faSpinner : (geoSuccess ? faCheckCircle : faLocationArrow)"
+                [spin]="isGeoLoading"></fa-icon>
+              <span>{{ isGeoLoading ? 'Localisation...' : geoSuccess ? 'Position enregistrée — Cliquer pour
+                réinitialiser' : 'Utiliser ma position actuelle' }}</span>
+            </button>
+            <div class="geo-coords" *ngIf="geoSuccess && latitude !== null && longitude !== null">
+              📍 Lat : {{ latitude | number:'1.4-6' }} &nbsp;|&nbsp; Lng : {{ longitude | number:'1.4-6' }}
+            </div>
+            <p class="field-hint" *ngIf="!geoSuccess">
+              Optionnel : permet aux clients de vous trouver via la recherche de proximité.
+            </p>
+            <p class="error-msg" *ngIf="geoError">
+              <fa-icon [icon]="faExclamationTriangle"></fa-icon> {{ geoError }}
+            </p>
+          </div>
         </div>
 
         <div class="form-row">

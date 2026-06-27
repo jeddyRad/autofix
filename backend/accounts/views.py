@@ -10,6 +10,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -38,12 +39,17 @@ def _send_otp_email(user, otp):
             f"À très bientôt sur notre plateforme,\n"
             f"L'équipe AutoFix MG"
         )
+        
+        ctx = {'first_name': user.first_name, 'otp': otp}
+        html_body = render_to_string('emails/verification_code.html', ctx)
+        
         send_mail(
             subject,
             message,
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
             fail_silently=False,
+            html_message=html_body,
         )
     except Exception as exc:
         logger.error('[OTP] Envoi email échoué pour %s : %s', user.email, exc)
