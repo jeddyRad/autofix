@@ -206,6 +206,15 @@
 .btn-full { width: 100%; text-align: center; }
 .btn-large { padding: 1rem 1.5rem; font-size: 1.05rem; }
 
+.field-hint {
+  font-size: 0.8rem;
+  color: #f59e0b;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .success-banner {
   background-color: #f6ffed;
   color: #389e0d;
@@ -249,4 +258,35 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+/* Stars Display */
+.stars-display {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.stars-display fa-icon {
+  color: #e2e8f0;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
+}
+
+.stars-display fa-icon.filled {
+  color: #fbbf24;
+}
+
+.stars-display fa-icon.empty {
+  color: #e2e8f0;
+}
+
+.rating-overview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  background: #f8fafc;
+  border-radius: 16px;
 }

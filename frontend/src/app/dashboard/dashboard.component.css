@@ -30,9 +30,21 @@
   border-radius: 20px;
   text-transform: uppercase;
 }
-.role-badge.CLIENT { background: #e6f7ff; color: #1890ff; }
-.role-badge.PROVIDER { background: #fff7e6; color: #fa8c16; }
-.role-badge.ADMIN { background: #f9f0ff; color: #722ed1; }
+
+.role-badge.CLIENT {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.role-badge.PROVIDER {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.role-badge.ADMIN {
+  background: #f9f0ff;
+  color: #722ed1;
+}
 
 /* Stats */
 .stats-grid {
@@ -66,10 +78,22 @@
   align-items: center;
   justify-content: center;
 }
-.stat-icon.pending { background: #fff7e6; }
-.stat-icon.accepted { background: #f6ffed; }
-.stat-icon.completed { background: #e6f7ff; }
-.stat-icon.cancelled { background: #fff1f0; }
+
+.stat-icon.pending {
+  background: #fff7e6;
+}
+
+.stat-icon.accepted {
+  background: #f6ffed;
+}
+
+.stat-icon.completed {
+  background: #e6f7ff;
+}
+
+.stat-icon.cancelled {
+  background: #fff1f0;
+}
 
 .stat-info {
   display: flex;
@@ -175,10 +199,26 @@
   border-radius: 20px;
   text-transform: uppercase;
 }
-.status-badge.PENDING { background: #fff7e6; color: #fa8c16; }
-.status-badge.ACCEPTED { background: #f6ffed; color: #52c41a; }
-.status-badge.COMPLETED { background: #e6f7ff; color: #1890ff; }
-.status-badge.CANCELLED { background: #fff1f0; color: #f5222d; }
+
+.status-badge.PENDING {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.status-badge.ACCEPTED {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.status-badge.COMPLETED {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.status-badge.CANCELLED {
+  background: #fff1f0;
+  color: #f5222d;
+}
 
 .payment-badge {
   font-size: 0.8rem;
@@ -186,8 +226,16 @@
   padding: 0.2rem 0.5rem;
   border-radius: 6px;
 }
-.payment-badge.PAID { background: #f6ffed; color: #389e0d; }
-.payment-badge.UNPAID { background: #fff7e6; color: #fa8c16; }
+
+.payment-badge.PAID {
+  background: #f6ffed;
+  color: #389e0d;
+}
+
+.payment-badge.UNPAID {
+  background: #fff7e6;
+  color: #fa8c16;
+}
 
 .apt-body {
   padding: 1.25rem 1.5rem;
@@ -263,7 +311,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -343,6 +391,11 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

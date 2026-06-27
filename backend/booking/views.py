@@ -1,4 +1,4 @@
-﻿import csv
+import csv
 import stripe
 import logging
 from django.conf import settings
@@ -66,7 +66,24 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         return qs.order_by('-date')
 
     def perform_create(self, serializer):
-        serializer.save(client=self.request.user, status='PENDING')
+        appointment = serializer.save(client=self.request.user, status='PENDING')
+        
+        # ── Email notification to Provider ──
+        provider_name = f"{appointment.provider.first_name} {appointment.provider.last_name}"
+        client_name = f"{appointment.client.first_name} {appointment.client.last_name}"
+        _notify_appointment(
+            f"🔔 Nouvelle demande d'intervention – AutoFix MG",
+            (
+                f"Bonjour {provider_name},\n\n"
+                f"Vous avez reçu une nouvelle demande d'intervention de la part de {client_name} pour le {appointment.date} ({appointment.time_slot}).\n\n"
+                f"Détails du véhicule : {appointment.vehicle_info}\n"
+                f"Problème signalé : {appointment.problem_description}\n\n"
+                f"Veuillez vous connecter à votre tableau de bord AutoFix MG pour consulter les détails de cette demande, l'accepter et proposer votre tarif d'intervention.\n\n"
+                f"Cordialement,\n"
+                f"L'équipe AutoFix MG"
+            ),
+            appointment.provider.email,
+        )
 
     def partial_update(self, request, *args, **kwargs):
         """
@@ -102,7 +119,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         writer = csv.writer(response, delimiter=';')
         writer.writerow([
             'ID', 'Date', 'Créneau', 'Statut', 'Paiement',
-            'Client', 'Prestataire', 'Véhicule', 'Problème', 'Prix (€)'
+            'Client', 'Prestataire', 'Véhicule', 'Problème', 'Prix (Ar)'
         ])
 
         for apt in qs:
@@ -150,21 +167,29 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             f"✅ Votre rendez-vous du {appointment.date} a été accepté – AutoFix MG",
             (
                 f"Bonjour {client_name},\n\n"
-                f"Votre rendez-vous du {appointment.date} ({appointment.time_slot}) "
-                f"avec {provider_name} a été accepté.\n"
-                f"Prix convenu : {appointment.price} €\n\n"
-                "Connectez-vous pour procéder au paiement.\n\nAutoFix MG"
+                f"Excellente nouvelle ! Votre demande de rendez-vous pour le {appointment.date} ({appointment.time_slot}) a été acceptée par le prestataire {provider_name}.\n\n"
+                f"Détails de l'intervention :\n"
+                f"- Prestataire : {provider_name}\n"
+                f"- Tarif convenu : {appointment.price} Ar\n\n"
+                f"Vous pouvez désormais procéder au paiement sécurisé via votre tableau de bord (Espace Client) pour confirmer définitivement l'intervention.\n\n"
+                f"Merci de votre confiance,\n"
+                f"L'équipe AutoFix MG"
             ),
             appointment.client.email,
         )
         _notify_appointment(
-            f"📋 Nouveau rendez-vous confirmé le {appointment.date} – AutoFix MG",
+            f"📋 Confirmation d'acceptation de rendez-vous – AutoFix MG",
             (
                 f"Bonjour {provider_name},\n\n"
-                f"Vous avez accepté le rendez-vous de {client_name} "
-                f"pour le {appointment.date} ({appointment.time_slot}).\n"
-                f"Véhicule : {appointment.vehicle_info}\n"
-                f"Problème : {appointment.problem_description}\n\nAutoFix MG"
+                f"Vous avez accepté de prendre en charge le véhicule de {client_name} pour le {appointment.date} ({appointment.time_slot}).\n\n"
+                f"Récapitulatif de la demande :\n"
+                f"- Client : {client_name}\n"
+                f"- Véhicule : {appointment.vehicle_info}\n"
+                f"- Descriptif du problème : {appointment.problem_description}\n"
+                f"- Tarif proposé : {appointment.price} Ar\n\n"
+                f"N'oubliez pas de mettre à jour le statut de l'intervention via votre tableau de bord une fois l'opération commencée.\n\n"
+                f"Bonne intervention,\n"
+                f"L'équipe AutoFix MG"
             ),
             appointment.provider.email,
         )
@@ -203,9 +228,10 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             f"🏁 Votre intervention du {appointment.date} est terminée – AutoFix MG",
             (
                 f"Bonjour {client_name},\n\n"
-                f"L'intervention de {provider_name} du {appointment.date} est maintenant clôturée.\n"
-                f"Montant payé : {appointment.price} €\n\n"
-                "N'hésitez pas à laisser un avis sur la prestation.\n\nAutoFix MG"
+                f"L'intervention réalisée par {provider_name} sur votre véhicule le {appointment.date} est désormais terminée et clôturée.\n\n"
+                f"Nous espérons que le service a pleinement répondu à vos attentes. Votre avis est précieux pour nous et pour l'ensemble de la communauté AutoFix MG : nous vous invitons à laisser une note et un commentaire au prestataire depuis votre espace client.\n\n"
+                f"Merci de votre confiance et à bientôt,\n"
+                f"L'équipe AutoFix MG"
             ),
             appointment.client.email,
         )
@@ -231,11 +257,13 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         # ── Email notification ──
         cancelled_by = f"{user.first_name} {user.last_name}"
         _notify_appointment(
-            f"❌ Rendez-vous du {appointment.date} annulé – AutoFix MG",
+            f"❌ Annulation de rendez-vous : {appointment.date} – AutoFix MG",
             (
                 f"Bonjour,\n\n"
-                f"Le rendez-vous du {appointment.date} ({appointment.time_slot}) "
-                f"a été annulé par {cancelled_by}.\n\nAutoFix MG"
+                f"Nous vous informons par la présente que le rendez-vous prévu le {appointment.date} à {appointment.time_slot} a été annulé par {cancelled_by}.\n\n"
+                f"Si vous souhaitez reprogrammer cette intervention ou prendre un nouveau rendez-vous, vous pouvez le faire à tout moment via la plateforme AutoFix MG.\n\n"
+                f"Cordialement,\n"
+                f"L'équipe AutoFix MG"
             ),
             appointment.client.email,
             appointment.provider.email,
@@ -286,6 +314,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 # ─── Availability ViewSet ─────────────────────────────────────────────────────
 
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
 class AvailabilityViewSet(viewsets.ModelViewSet):
     """
     CRUD for provider weekly availability slots.
@@ -294,7 +324,7 @@ class AvailabilityViewSet(viewsets.ModelViewSet):
     DELETE /api/availability/<id>/        — delete a slot (PROVIDER only)
     """
     serializer_class = AvailabilitySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         provider_id = self.request.query_params.get('provider')
@@ -363,7 +393,7 @@ class CreateStripeSessionView(generics.CreateAPIView):
                 payment_method_types=['card'],
                 line_items=[{
                     'price_data': {
-                        'currency': 'eur',
+                        'currency': 'mga',
                         'product_data': {
                             'name': (
                                 f"Service AutoFixMG – "

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faSearch, faCalendarAlt, faComments, faCreditCard } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faCalendarAlt, faComments, faCreditCard, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-home',
@@ -15,4 +15,5 @@ export class HomeComponent {
   faCalendarAlt = faCalendarAlt;
   faComments = faComments;
   faCreditCard = faCreditCard;
+  faArrowRight = faArrowRight;
 }

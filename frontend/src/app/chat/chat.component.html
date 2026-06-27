@@ -1,25 +1,28 @@
 <div class="chat-page">
   <!-- Sidebar: Conversation list -->
   <div class="chat-sidebar">
-    <div class="sidebar-header">
-      <h2>Messagerie</h2>
+    <div class="sidebar-header animate-fade-in">
+      <h2>Messages</h2>
     </div>
 
     <div *ngIf="isLoading" class="sidebar-loading">
-      <div class="spinner-small"></div>
+      <div class="spinner"></div>
     </div>
 
-    <div *ngIf="!isLoading && conversations.length === 0" class="sidebar-empty">
-      <p>Aucune conversation.</p>
-      <p class="hint">Les discussions avec les prestataires apparaîtront ici.</p>
+    <div *ngIf="!isLoading && conversations.length === 0" class="sidebar-empty animate-fade-in">
+      <p>Aucune discussion</p>
+      <p class="hint">Commencez une conversation depuis le profil d'un prestataire.</p>
     </div>
 
-    <div class="conversation-list">
-      <div *ngFor="let conv of conversations" class="conversation-item"
+    <div class="conversation-list animate-fade-up">
+      <div *ngFor="let conv of conversations" class="conversation-item shadow-hover"
         [class.active]="selectedPartner?.id === conv.partner?.id" (click)="selectPartner(conv)">
         <div class="conv-avatar">{{ (conv.partner?.first_name || '?')[0] }}</div>
         <div class="conv-info">
-          <span class="conv-name">{{ conv.partner?.first_name }} {{ conv.partner?.last_name }}</span>
+          <div class="conv-name-row">
+            <span class="conv-name">{{ conv.partner?.first_name }} {{ conv.partner?.last_name }}</span>
+            <span *ngIf="conv.unread_count > 0" class="conv-badge">{{ conv.unread_count }}</span>
+          </div>
           <span class="conv-preview">{{ conv.last_message?.content }}</span>
         </div>
       </div>
@@ -28,14 +31,14 @@
 
   <!-- Main: Messages -->
   <div class="chat-main">
-    <div *ngIf="!selectedPartner" class="chat-empty">
+    <div *ngIf="!selectedPartner" class="chat-empty animate-fade-in">
       <span class="chat-empty-icon"><fa-icon [icon]="faCommentDots"></fa-icon></span>
-      <h3>Sélectionnez une conversation</h3>
-      <p>Choisissez un contact dans la liste pour commencer à discuter.</p>
+      <h3>Vos conversations</h3>
+      <p>Sélectionnez un contact pour démarrer l'échange en temps réel.</p>
     </div>
 
     <ng-container *ngIf="selectedPartner">
-      <div class="chat-header">
+      <div class="chat-header animate-fade-in">
         <div class="chat-partner-info">
           <div class="partner-avatar">{{ (selectedPartner?.first_name || '?')[0] }}</div>
           <span class="partner-name">{{ selectedPartner?.first_name }} {{ selectedPartner?.last_name }}</span>
@@ -44,20 +47,20 @@
 
       <div class="messages-container" #messagesContainer>
         <div *ngIf="messages.length === 0" class="messages-empty">
-          <p>Aucun message pour le moment. Envoyez le premier !</p>
+          <p>Dites bonjour à votre interlocuteur !</p>
         </div>
-        <div *ngFor="let msg of messages; trackBy: trackById" class="message-bubble" [class.own]="isOwnMessage(msg)"
+        <div *ngFor="let msg of messages; trackBy: trackById" class="message-bubble animate-fade-up" [class.own]="isOwnMessage(msg)"
           [class.other]="!isOwnMessage(msg)">
           <div class="bubble-content">{{ msg.content }}</div>
           <div class="bubble-time">{{ msg.timestamp | date:'HH:mm' }}</div>
         </div>
       </div>
 
-      <div class="chat-input-bar">
-        <textarea [(ngModel)]="newMessage" placeholder="Écrire un message..." rows="1"
+      <div class="chat-input-bar animate-fade-in">
+        <textarea [(ngModel)]="newMessage" placeholder="Tapez votre message ici..." rows="1"
           (keydown)="onKeyDown($event)"></textarea>
-        <button class="btn btn-primary send-btn" (click)="sendMessage()" [disabled]="!newMessage.trim()">
-          Envoyer
+        <button class="btn btn-primary send-btn shadow-hover" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+          <fa-icon [icon]="faPaperPlane"></fa-icon>
         </button>
       </div>
     </ng-container>

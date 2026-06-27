@@ -2,17 +2,26 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AvailabilityService } from '../services/availability.service';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faPlusCircle, faTrash, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-availability',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, FontAwesomeModule],
     templateUrl: './availability.component.html',
     styleUrl: './availability.component.css'
 })
 export class AvailabilityComponent implements OnInit {
     slots: any[] = [];
     isLoading = false;
+    faPlusCircle = faPlusCircle;
+    faTrash = faTrash;
+    faExclamationCircle = faExclamationCircle;
+    
+    // Modal Delete
+    showDeleteModal = false;
+    slotToDelete: number | null = null;
 
     WEEKDAYS = [
         { value: 0, label: 'Lundi' },
@@ -54,8 +63,24 @@ export class AvailabilityComponent implements OnInit {
     }
 
     deleteSlot(id: number) {
-        if (!confirm('Supprimer ce créneau ?')) return;
-        this.availabilityService.deleteSlot(id).subscribe({ next: () => this.loadSlots() });
+        this.slotToDelete = id;
+        this.showDeleteModal = true;
+    }
+
+    confirmDelete() {
+        if (this.slotToDelete) {
+            this.availabilityService.deleteSlot(this.slotToDelete).subscribe({
+                next: () => {
+                    this.loadSlots();
+                    this.cancelDelete();
+                }
+            });
+        }
+    }
+
+    cancelDelete() {
+        this.showDeleteModal = false;
+        this.slotToDelete = null;
     }
 
     weekdayLabel(day: number): string {

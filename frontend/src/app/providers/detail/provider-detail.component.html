@@ -2,22 +2,22 @@
   <!-- Loading state -->
   <div *ngIf="isLoading" class="loading-container">
     <div class="spinner"></div>
-    <p>Chargement du profil...</p>
+    <p>Récupération de l'expertise...</p>
   </div>
 
   <div *ngIf="!isLoading && provider" class="detail-layout">
     <!-- Left Column: Provider Info & Reviews -->
-    <div class="main-column">
+    <div class="main-column animate-fade-up">
       <!-- Profile Header Card -->
-      <div class="profile-card">
+      <div class="profile-card card glass-panel">
         <div class="profile-header">
-          <div class="avatar"><fa-icon [icon]="faWrench"></fa-icon></div>
+          <div class="avatar shadow-sm"><fa-icon [icon]="faWrench"></fa-icon></div>
           <div class="profile-title">
             <span class="specialty-badge" [ngClass]="provider.provider_profile?.specialty">
-              {{ provider.provider_profile?.specialty === 'GARAGE' ? 'Garage' : (provider.provider_profile?.specialty === 'DEPANNAGE' ? 'Dépannage' : 'Mécanicien') }}
+              {{ provider.provider_profile?.specialty === 'GARAGE' ? 'Garage multiservices' : (provider.provider_profile?.specialty === 'DEPANNAGE' ? 'Dépannage & Remorquage' : 'Mécanicien expert') }}
             </span>
             <h2>{{ provider.provider_profile?.business_name || provider.first_name + ' ' + provider.last_name }}</h2>
-            <p class="provider-owner">Proposé par {{ provider.first_name }} {{ provider.last_name }}</p>
+            <p class="provider-owner">Dirigé par {{ provider.first_name }} {{ provider.last_name }}</p>
           </div>
         </div>
 
@@ -25,101 +25,115 @@
           <div class="detail-item">
             <span class="detail-icon"><fa-icon [icon]="faMapMarkerAlt"></fa-icon></span>
             <div>
-              <strong>Adresse</strong>
+              <strong>Lieu d'activité</strong>
               <p>{{ provider.provider_profile?.address }}, {{ provider.city }}</p>
             </div>
           </div>
           <div class="detail-item">
             <span class="detail-icon"><fa-icon [icon]="faPhone"></fa-icon></span>
             <div>
-              <strong>Téléphone</strong>
+              <strong>Contact direct</strong>
               <p>{{ provider.phone || 'Non communiqué' }}</p>
             </div>
           </div>
           <div class="detail-item">
             <span class="detail-icon"><fa-icon [icon]="faBriefcase"></fa-icon></span>
             <div>
-              <strong>Expérience</strong>
-              <p>{{ provider.provider_profile?.experience_years || 0 }} ans d'activité</p>
+              <strong>Expérience accumulée</strong>
+              <p>{{ provider.provider_profile?.experience_years || 0 }} ans</p>
             </div>
           </div>
           <div class="detail-item">
-            <span class="detail-icon"><fa-icon [icon]="faEuroSign"></fa-icon></span>
+            <span class="detail-icon"><fa-icon [icon]="faMoneyBill"></fa-icon></span>
             <div>
-              <strong>Tarif indicatif</strong>
-              <p>{{ provider.provider_profile?.price_rate || 0 }} € / intervention</p>
+              <strong>Estimation tarifaire</strong>
+              <p>{{ (provider.provider_profile?.price_rate ?? 0) | number:'1.0-0' }} Ar / service</p>
             </div>
           </div>
         </div>
 
         <div class="profile-bio">
-          <h3>À propos</h3>
-          <p>{{ provider.provider_profile?.bio || 'Aucune description fournie.' }}</p>
+          <h3>À propos de ce prestataire</h3>
+          <p>{{ provider.provider_profile?.bio || 'Ce prestataire n\'a pas encore rédigé de présentation.' }}</p>
         </div>
 
         <div class="profile-actions" *ngIf="authService.currentUser()?.id !== provider.id">
-          <button class="btn btn-primary" (click)="contactProvider()"><fa-icon [icon]="faCommentDots"></fa-icon> Envoyer un message</button>
+          <button class="btn btn-outline shadow-hover" (click)="contactProvider()">
+            <fa-icon [icon]="faCommentDots"></fa-icon> Démarrer une discussion
+          </button>
         </div>
       </div>
 
       <!-- Reviews Section -->
-      <div class="reviews-section">
-        <h3>Avis clients ({{ provider.provider_profile?.rating || '0.0' }} / 5)</h3>
+      <div class="reviews-section card glass-panel mt-4 animate-fade-up" style="animation-delay: 0.2s;">
+        <h3>Retours d'expérience clients ({{ provider.provider_profile?.rating || '0.0' }} / 5)</h3>
         <div class="reviews-list">
-          <div class="empty-reviews">
-            <span class="star-large"><fa-icon [icon]="faStar"></fa-icon></span>
-            <p>Ce prestataire a une note moyenne de <strong>{{ provider.provider_profile?.rating || '0.0' }} / 5</strong> basée sur les interventions réalisées.</p>
+          <div class="rating-overview">
+            <div class="stars-display">
+              <fa-icon *ngFor="let s of getStars(provider.provider_profile?.rating)" 
+                       [icon]="faStar" 
+                       [class.filled]="s === 1" 
+                       [class.empty]="s === 0"></fa-icon>
+            </div>
+            <p>Ce prestataire dispose d'une note globale de <strong>{{ provider.provider_profile?.rating || '0.0' }} / 5</strong>.</p>
+            <p class="text-muted">Les avis détaillés apparaîtront prochainement.</p>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Right Column: Booking Form -->
-    <div class="sidebar-column">
-      <div *ngIf="authService.currentUser()?.id === provider.id; else bookingCard" class="booking-notice-card">
-        <h3>Votre profil</h3>
-        <p>Ceci est votre profil prestataire. Vous ne pouvez pas prendre de rendez-vous avec vous-même.</p>
-        <button class="btn btn-primary btn-full" routerLink="/dashboard">Aller au Tableau de Bord</button>
+    <div class="sidebar-column animate-fade-up" style="animation-delay: 0.1s;">
+      <div *ngIf="authService.currentUser()?.id === provider.id; else bookingCard" class="booking-notice-card card glass-panel">
+        <h3>Votre propre profil</h3>
+        <p>Ceci est votre vitrine publique. Vous pouvez gérer vos interventions depuis votre tableau de bord.</p>
+        <button class="btn btn-primary btn-full shadow-hover" routerLink="/dashboard">Voir mes interventions</button>
       </div>
 
       <ng-template #bookingCard>
-        <div class="booking-card">
-          <h3>Prendre Rendez-vous</h3>
-          <p class="subtitle">Sélectionnez vos disponibilités pour planifier l'intervention.</p>
+        <div class="booking-card card glass-panel">
+          <h3>Réserver un service</h3>
+          <p class="subtitle">Sélectionnez la date et l'heure pour votre intervention.</p>
 
-          <div *ngIf="bookingSuccess" class="success-banner">
-            Rendez-vous créé avec succès ! Redirection...
+          <div *ngIf="bookingSuccess" class="success-banner animate-fade-in">
+            <fa-icon [icon]="faCheckCircle"></fa-icon> Demande transmise avec succès !
           </div>
           
-          <div *ngIf="bookingError" class="error-banner">
-            {{ bookingError }}
+          <div *ngIf="bookingError" class="error-banner animate-fade-in">
+            <fa-icon [icon]="faExclamationTriangle"></fa-icon> {{ bookingError }}
           </div>
 
-          <form (ngSubmit)="onBook()">
+          <form (ngSubmit)="onBook()" class="animate-fade-in">
             <div class="form-group">
-              <label for="date">Date souhaitée *</label>
-              <input type="date" id="date" name="date" [(ngModel)]="date" required>
+              <label><fa-icon [icon]="faCalendarAlt"></fa-icon> Date du rendez-vous</label>
+              <input type="date" name="date" [(ngModel)]="date" (ngModelChange)="onDateChange()" required>
             </div>
 
             <div class="form-group">
-              <label for="time_slot">Créneau horaire *</label>
-              <select id="time_slot" name="time_slot" [(ngModel)]="timeSlot">
+              <label><fa-icon [icon]="faClock"></fa-icon> Créneau disponible</label>
+              <select name="time_slot" [(ngModel)]="timeSlot">
+                <option *ngIf="!date" value="">Veuillez choisir une date d'abord</option>
+                <option *ngIf="date && timeSlots.length === 0" value="">Aucun créneau disponible ce jour</option>
                 <option *ngFor="let slot of timeSlots" [value]="slot">{{ slot }}</option>
               </select>
+              <p class="field-hint" *ngIf="date && timeSlots.length === 0">
+                <fa-icon [icon]="faExclamationTriangle"></fa-icon> Ce prestataire n'a pas configuré de disponibilités pour ce jour.
+              </p>
             </div>
 
             <div class="form-group">
-              <label for="vehicle_info">Votre Véhicule *</label>
-              <input type="text" id="vehicle_info" name="vehicle_info" [(ngModel)]="vehicleInfo" placeholder="Ex: Peugeot 208, Immatriculation TAB 1234" required>
+              <label><fa-icon [icon]="faCar"></fa-icon> Votre véhicule</label>
+              <input type="text" name="vehicle_info" [(ngModel)]="vehicleInfo" placeholder="Marque, modèle et immatriculation" required>
             </div>
 
             <div class="form-group">
-              <label for="problem_description">Description du problème / Panne *</label>
-              <textarea id="problem_description" name="problem_description" [(ngModel)]="problemDescription" rows="4" placeholder="Décrivez en détail la panne ou le service souhaité..." required></textarea>
+              <label><fa-icon [icon]="faTools"></fa-icon> Description du besoin</label>
+              <textarea name="problem_description" [(ngModel)]="problemDescription" rows="5" placeholder="Décrivez les symptômes ou le service demandé..." required></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-full btn-large" [disabled]="isBookingLoading">
-              {{ isBookingLoading ? 'Création en cours...' : 'Confirmer la demande' }}
+            <button type="submit" class="btn btn-primary btn-full btn-large shadow-hover" [disabled]="isBookingLoading">
+              <fa-icon *ngIf="isBookingLoading" [icon]="faSpinner" [spin]="true"></fa-icon>
+              {{ isBookingLoading ? 'Envoi...' : 'Planifier l\'intervention' }}
             </button>
           </form>
         </div>

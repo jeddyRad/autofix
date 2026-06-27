@@ -10,10 +10,10 @@ import { PaymentSuccessComponent } from './payments/success/payment-success.comp
 import { PaymentCancelComponent } from './payments/cancel/payment-cancel.component';
 import { ProfileComponent } from './profile/profile.component';
 import { authGuard } from './guards/auth.guard';
+import { roleGuard } from './guards/role.guard';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 import { AdminDashboardComponent } from './admin/admin-dashboard.component';
-import { HistoryComponent } from './history/history.component';
 import { AvailabilityComponent } from './availability/availability.component';
 
 export const routes: Routes = [
@@ -21,11 +21,10 @@ export const routes: Routes = [
   { path: 'providers', component: ProviderListComponent },
   { path: 'providers/:id', component: ProviderDetailComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-  { path: 'admin', component: AdminDashboardComponent, canActivate: [authGuard] },
+  { path: 'admin', component: AdminDashboardComponent, canActivate: [roleGuard('ADMIN')] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'chat', component: ChatComponent, canActivate: [authGuard] },
-  { path: 'history', component: HistoryComponent, canActivate: [authGuard] },
-  { path: 'availability', component: AvailabilityComponent, canActivate: [authGuard] },
+  { path: 'availability', component: AvailabilityComponent, canActivate: [roleGuard('PROVIDER')] },
   { path: 'payment/success', component: PaymentSuccessComponent, canActivate: [authGuard] },
   { path: 'payment/cancel', component: PaymentCancelComponent, canActivate: [authGuard] },
   { path: 'login', component: LoginComponent },

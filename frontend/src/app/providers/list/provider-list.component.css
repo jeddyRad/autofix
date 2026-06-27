@@ -1,67 +1,329 @@
-.search-page {
+/* Bento Search Container */
+.search-container {
   padding-top: 3rem;
-  padding-bottom: 5rem;
-  min-height: calc(100vh - 160px);
+  padding-bottom: 6rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
+/* Header Section */
 .search-header {
+  margin-bottom: 4rem;
   text-align: center;
-  margin-bottom: 3rem;
+}
+
+.search-header .eyebrow {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 1rem;
 }
 
 .search-header h1 {
-  font-size: 2.5rem;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
   color: var(--secondary);
-  margin-bottom: 0.5rem;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
 }
 
 .search-header p {
+  font-size: 1.15rem;
   color: var(--text-muted);
-  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.filter-card {
+/* Filter Bento Box */
+.filter-bento-box {
   background: var(--white);
+  border-radius: 24px;
   padding: 2rem;
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  margin-bottom: 3rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 10px 40px rgba(15, 23, 42, 0.05);
+  margin-bottom: 4rem;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 1.5rem;
+  align-items: end;
 }
 
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+@media (max-width: 1024px) {
+  .filter-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .filter-group label {
-  font-weight: 600;
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
   color: var(--secondary);
-  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.8;
+}
+
+.input-wrapper,
+.select-wrapper {
+  position: relative;
 }
 
 .filter-group input,
 .filter-group select {
-  padding: 0.75rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 1rem;
-  background-color: var(--white);
-  transition: border-color 0.3s ease;
-  outline: none;
+  height: 54px;
+  border: 1px solid #eef2f6;
+  background: #f8fafc;
+  border-radius: 14px;
+  font-weight: 500;
+  color: var(--secondary);
+  transition: all 0.3s ease;
 }
 
 .filter-group input:focus,
 .filter-group select:focus {
+  background: white;
   border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(255, 127, 0, 0.1);
 }
+
+/* Modern Geo Button */
+.btn-modern-geo {
+  width: 100%;
+  height: 54px;
+  background: #f8fafc;
+  border: 1px solid #eef2f6;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  color: var(--secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-modern-geo:hover {
+  background: #f1f5f9;
+}
+
+.btn-modern-geo.is-active {
+  background: var(--secondary);
+  color: white;
+  border-color: var(--secondary);
+}
+
+/* Grid Layout (Masonry-like) */
+.providers-masonry {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2.5rem;
+}
+
+/* Expert Card */
+.expert-card {
+  background: white;
+  border-radius: 28px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  position: relative;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.expert-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  border-color: rgba(255, 127, 0, 0.2);
+}
+
+.card-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.badge.MECANICIEN {
+  background: #E0F2FE;
+  color: #0369A1;
+}
+
+.badge.DEPANNAGE {
+  background: #FFE4E6;
+  color: #BE123C;
+}
+
+.badge.GARAGE {
+  background: #DCFCE7;
+  color: #15803D;
+}
+
+.rating-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--secondary);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.rating-pill.is-new {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.expert-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--secondary);
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.expert-subtitle {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}
+
+/* Meta Rows */
+.meta-row {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+  align-items: center;
+}
+
+.meta-icon {
+  width: 44px;
+  height: 44px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  color: var(--primary);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.location-primary {
+  color: var(--secondary);
+  font-weight: 700;
+  margin: 0;
+}
+
+.geo-distance {
+  color: var(--primary);
+}
+
+.location-secondary {
+  color: var(--text-light);
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 0.25rem 0 0;
+}
+
+/* Price Section */
+.price-section {
+  margin: 2rem 0;
+  background: #fff8f1;
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px dashed #ffe5d0;
+}
+
+.price-details .price-amount {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--secondary);
+}
+
+.price-details .price-unit {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-left: 0.4rem;
+}
+
+.expert-bio {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  flex-grow: 1;
+}
+
+/* Action Bar */
+.card-action-bar {
+  margin-top: auto;
+}
+
+.btn-action-primary {
+  width: 100%;
+  height: 56px;
+  background: var(--secondary);
+  color: white;
+  border-radius: 16px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-action-primary:hover {
+  background: var(--primary);
+  transform: scale(1.02);
+  box-shadow: 0 10px 25px rgba(255, 127, 0, 0.3);
+}
+
+/* Skeletons */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2.5rem;
+}
+
+.skeleton-card {
+  height: 450px;
+  background: #f1f5f9;
+  border-radius: 28px;
+  animation: pulse-subtle 2s infinite ease-in-out;
+}
+
+
 
 .filter-actions {
   display: flex;
@@ -69,152 +331,7 @@
   margin-top: 1.5rem;
 }
 
-.provider-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem;
-}
-
-.provider-card {
-  background: var(--white);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s ease;
-  border: 1px solid #eee;
-}
-
-.provider-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-lg);
-}
-
-.card-header {
-  padding: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #fcfcfc;
-  border-bottom: 1px solid #f5f5f5;
-}
-
-.specialty-badge {
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  text-transform: uppercase;
-}
-
-.specialty-badge.MECANICIEN {
-  background-color: #e6f7ff;
-  color: #1890ff;
-}
-
-.specialty-badge.DEPANNAGE {
-  background-color: #fff1f0;
-  color: #f5222d;
-}
-
-.specialty-badge.GARAGE {
-  background-color: #f6ffed;
-  color: #52c41a;
-}
-
-.rating {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.star {
-  color: #fadb14;
-  font-size: 1.1rem;
-}
-
-.rating-value {
-  font-weight: 700;
-  color: var(--secondary);
-}
-
-.card-body {
-  padding: 1.5rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.business-name {
-  font-size: 1.25rem;
-  color: var(--secondary);
-  font-weight: 700;
-}
-
-.provider-name {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-
-.location,
-.rate {
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.bio {
-  color: #555;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 0.5rem;
-}
-
-.card-footer {
-  padding: 1.5rem;
-  border-top: 1px solid #f5f5f5;
-}
-
-.btn-full {
-  width: 100%;
-  text-align: center;
-}
-
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 0;
-  gap: 1.5rem;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid var(--primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
+/* Empty State */
 
 .empty-card {
   text-align: center;
@@ -242,56 +359,8 @@
   margin-bottom: 1rem;
 }
 
-/* ── Geolocation UI ── */
-.geo-group {
-  display: flex;
-  flex-direction: column;
-}
 
-.btn-geo {
-  background-color: transparent;
-  color: #3b82f6;
-  border: 1px solid #3b82f6;
-  transition: all 0.2s ease;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  height: 100%;
-}
-
-.btn-geo:hover {
-  background-color: #eff6ff;
-}
-
-.btn-geo.active {
-  background-color: #3b82f6;
-  color: white;
-}
-
-.btn-geo.active:hover {
-  background-color: #2563eb;
-}
-
-.geo-error {
-  background-color: #fef2f2;
-  color: #ef4444;
-  padding: 0.75rem;
-  border-radius: 8px;
+.empty-illustration {
+  font-size: 5rem;
   margin-bottom: 2rem;
-  text-align: center;
-  font-weight: 500;
-}
-
-.distance-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  background-color: #ecfdf5;
-  color: #10b981;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-left: 0.5rem;
 }

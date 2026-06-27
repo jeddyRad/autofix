@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HistoryService } from '../services/history.service';
 import { timer, Subscription } from 'rxjs';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faDownload, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-history',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, FontAwesomeModule],
     templateUrl: './history.component.html',
     styleUrl: './history.component.css'
 })
@@ -15,6 +17,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
     appointments: any[] = [];
     isLoading = false;
     filters = { status: '', date_from: '', date_to: '' };
+    faDownload = faDownload;
+    faCheckCircle = faCheckCircle;
     private pollingSub!: Subscription;
 
     STATUSES = [

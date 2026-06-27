@@ -28,9 +28,19 @@ User = get_user_model()
 def _send_otp_email(user, otp):
     """Helper that sends an OTP email, logging failure without crashing the request."""
     try:
+        subject = f"[AutoFix MG] Vérification de votre compte - Code : {otp}"
+        message = (
+            f"Bonjour {user.first_name},\n\n"
+            f"Bienvenue sur AutoFix MG, votre plateforme de confiance pour l'entretien automobile à Madagascar.\n\n"
+            f"Pour finaliser la création de votre compte, veuillez utiliser le code de sécurité ci-dessous :\n\n"
+            f"CODE DE VALIDATION : {otp}\n\n"
+            f"Ce code est strictement personnel et expirera dans 10 minutes. Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail en toute sécurité.\n\n"
+            f"À très bientôt sur notre plateforme,\n"
+            f"L'équipe AutoFix MG"
+        )
         send_mail(
-            'Validation de votre compte AutoFixMG',
-            f'Votre code de validation est : {otp}\n\nCe code est valable 10 minutes.',
+            subject,
+            message,
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
             fail_silently=False,
@@ -107,7 +117,7 @@ class ProviderListView(generics.ListAPIView):
                 models.Q(provider_profile__bio__icontains=search)
             )
 
-        # ── Geolocation filter (Haversine, SQL pur — sans PostGIS) ──────────────
+        # ── Geolocation filter (Haversine, SQL) ───────────────────────────────────
         if lat and lng:
             try:
                 lat_f = float(lat)
@@ -117,6 +127,8 @@ class ProviderListView(generics.ListAPIView):
                 return queryset
 
             # Haversine formula in raw SQL (PostgreSQL math functions)
+            # We use RawSQL but avoid hardcoding the table name prefix if possible, 
+            # though Django's table names are predictable.
             haversine_sql = """
                 6371.0 * 2.0 * ASIN(SQRT(
                     POWER(SIN(RADIANS((accounts_providerprofile.latitude - %s) / 2.0)), 2)
@@ -125,12 +137,17 @@ class ProviderListView(generics.ListAPIView):
                     * POWER(SIN(RADIANS((accounts_providerprofile.longitude - %s) / 2.0)), 2)
                 ))
             """
-            # Only include providers that have coordinates set
+            
+            # Use filter on the profile fields before annotating to ensure join is present
             queryset = queryset.filter(
                 provider_profile__latitude__isnull=False,
-                provider_profile__longitude__isnull=False,
+                provider_profile__longitude__isnull=False
             ).annotate(
-                distance_km=RawSQL(haversine_sql, (lat_f, lat_f, lng_f))
+                distance_km=RawSQL(
+                    haversine_sql, 
+                    (lat_f, lat_f, lng_f),
+                    output_field=models.FloatField()
+                )
             ).filter(
                 distance_km__lte=radius_f
             ).order_by('distance_km')
@@ -248,9 +265,19 @@ class ForgotPasswordView(APIView):
         uid = user.pk.hex
         reset_link = f"{settings.FRONTEND_URL}/reset-password?uid={uid}&token={token}"
         try:
+            subject = "[AutoFix MG] Réinitialisation de votre mot de passe"
+            message = (
+                f"Bonjour {user.first_name},\n\n"
+                f"Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte AutoFix MG.\n"
+                f"Vous pouvez modifier votre mot de passe en cliquant sur le lien ci-dessous :\n\n"
+                f"{reset_link}\n\n"
+                f"Ce lien est valable pendant 24 heures. Si vous n'avez pas demandé ce changement, aucune action n'est requise de votre part et votre mot de passe actuel restera inchangé.\n\n"
+                f"Cordialement,\n"
+                f"L'équipe AutoFix MG"
+            )
             send_mail(
-                'Réinitialisation de votre mot de passe – AutoFixMG',
-                f'Cliquez sur ce lien pour réinitialiser votre mot de passe :\n\n{reset_link}\n\nCe lien expire dans 24 h.',
+                subject,
+                message,
                 settings.DEFAULT_FROM_EMAIL,
                 [user.email],
                 fail_silently=False,
@@ -357,4 +384,5 @@ class ProviderStatsView(APIView):
             'revenue_total': float(revenue),
             'average_rating': round(avg, 2) if avg else 0.0,
             'nb_reviews': nb_reviews,
+            'completion_rate': round((completed.count() / apts.count()) * 100, 1) if apts.count() > 0 else 0.0,
         })

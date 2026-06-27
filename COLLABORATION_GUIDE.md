@@ -93,3 +93,17 @@ Une fois cet environnement en place, le collaborateur peut suivre ce workflow no
 9. **Avis** : Le client va dans l'Historique et dépose un avis !
 
 Bienvenue dans l'équipe AutoFix MG ! N'hésitez pas à poser vos questions sur l'arborescence s'il y a des difficultés.
+
+
+## Pour l'utilisation de stripe de paiement
+
+Voici les principaux numéros fictifs que vous pouvez saisir dans votre formulaire:
+
+4242 4242 4242 4242: Simule un succès immédiat (Carte Visa standard).4000 0560 0000 0001 : Simule un échec pour fonds insuffisants (Utile pour tester l'affichage de vos messages d'erreur).
+4000 0021 0000 0055 : Simule une carte expirée.
+4000 0000 0000 0026 : Simule un code CVC incorrect.
+
+exemple de remplissage 
+Date d'expiration : 12/30  (date future)
+CVC : 123
+Nom : Test Autofix

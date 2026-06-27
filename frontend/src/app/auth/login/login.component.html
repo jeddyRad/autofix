@@ -1,33 +1,34 @@
 <div class="auth-container">
-  <div class="auth-card">
+  <div class="auth-card card glass-panel animate-fade-up">
     <div class="auth-header">
       <h2>Connexion</h2>
-      <p>Content de vous revoir sur AutoFixMG</p>
+      <p>Content de vous revoir sur AutoFix MG</p>
     </div>
 
     <div *ngIf="errorMessage" class="error-banner">
-      {{ errorMessage }}
+      <fa-icon [icon]="faExclamationCircle"></fa-icon> {{ errorMessage }}
     </div>
 
     <form class="auth-form" (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label for="email">Email</label>
+        <label for="email">Email professionnel ou personnel</label>
         <input type="email" id="email" name="email" [(ngModel)]="email" placeholder="votre@email.com" required>
       </div>
       <div class="form-group">
         <label for="password">Mot de passe</label>
         <input type="password" id="password" name="password" [(ngModel)]="password" placeholder="••••••••" required>
-        <div style="text-align: right; margin-top: 0.5rem;">
-          <a routerLink="/forgot-password" style="font-size: 0.9rem;">Mot de passe oublié ?</a>
+        <div style="text-align: right; margin-top: 0.75rem;">
+          <a routerLink="/forgot-password" class="text-sm font-semibold text-primary">Mot de passe oublié ?</a>
         </div>
       </div>
-      <button type="submit" class="btn btn-primary btn-block" [disabled]="isLoading">
-        {{ isLoading ? 'Connexion en cours...' : 'Se connecter' }}
+      <button type="submit" class="btn btn-primary btn-block shadow-hover" [disabled]="isLoading">
+        <fa-icon *ngIf="isLoading" [icon]="faSpinner" [spin]="true"></fa-icon>
+        {{ isLoading ? 'Authentification...' : 'Accéder à mon espace' }}
       </button>
     </form>
     <div class="auth-footer">
-      <p>Pas encore de compte ? <a routerLink="/register">S'inscrire</a></p>
-      <a routerLink="/" class="back-link">← Retour à l'accueil</a>
+      <p>Nouveau sur la plateforme ? <a routerLink="/register">Créer un compte</a></p>
+      <a routerLink="/" class="back-link">← Retour au portail</a>
     </div>
   </div>
 </div>

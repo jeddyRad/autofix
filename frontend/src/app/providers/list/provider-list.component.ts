@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ProviderService } from '../../services/provider.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faMapMarkerAlt, faEuroSign, faLocationArrow, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faMapMarkerAlt, faMoneyBill, faLocationArrow, faSpinner, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
 
@@ -17,9 +17,10 @@ import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operato
 })
 export class ProviderListComponent implements OnInit, OnDestroy {
   faMapMarkerAlt = faMapMarkerAlt;
-  faEuroSign = faEuroSign;
+  faMoneyBill = faMoneyBill;
   faLocationArrow = faLocationArrow;
   faSpinner = faSpinner;
+  faExclamationTriangle = faExclamationTriangle;
 
   providers: any[] = [];
 
@@ -129,5 +130,14 @@ export class ProviderListComponent implements OnInit, OnDestroy {
     this.selectedCity = '';
     this.selectedSpecialty = '';
     this.clearGeo();
+  }
+
+  getSpecialtyLabel(value: string): string {
+    switch (value) {
+      case 'GARAGE': return 'Garage';
+      case 'DEPANNAGE': return 'Dépannage';
+      case 'MECANICIEN': return 'Mécanicien';
+      default: return value;
+    }
   }
 }

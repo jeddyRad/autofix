@@ -5,41 +5,125 @@
     </div>
     <nav class="nav">
       <ul>
-        <li><a routerLink="/" title="Accueil"><fa-icon [icon]="faHome" class="nav-icon"></fa-icon> <span
+        <li *ngIf="!authService.isLoggedIn()"><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" title="Accueil"> <span
               class="nav-text">Accueil</span></a></li>
-        <li><a routerLink="/providers" title="Prestataires"><fa-icon [icon]="faTools" class="nav-icon"></fa-icon> <span
-              class="nav-text">Prestataires</span></a></li>
+
         <ng-container *ngIf="authService.isLoggedIn(); else anonymousTpl">
-          <li><a routerLink="/dashboard" title="Tableau de bord"><fa-icon [icon]="faClipboardList"
-                class="nav-icon"></fa-icon> <span class="nav-text">Tableau de bord</span></a></li>
-          <li><a routerLink="/profile" title="Profil"><fa-icon [icon]="faUser" class="nav-icon"></fa-icon> <span
+          <!-- Common to all logged in users -->
+          <li><a routerLink="/dashboard" routerLinkActive="active" title="Tableau de bord"> <span class="nav-text">Tableau de bord</span></a></li>
+          
+          <!-- Role specific: Client only -->
+          <li *ngIf="authService.getUserRole() === 'CLIENT'"><a routerLink="/providers" routerLinkActive="active" title="Prestataires"> <span
+                class="nav-text">Prestataires</span></a></li>
+          
+          <!-- Common -->
+          <li><a routerLink="/profile" routerLinkActive="active" title="Profil"> <span
                 class="nav-text">Profil</span></a></li>
-          <li><a routerLink="/history" title="Historique"><fa-icon [icon]="faClipboardList" class="nav-icon"></fa-icon>
-              <span class="nav-text">Historique</span></a></li>
-          <li *ngIf="authService.getUserRole() === 'PROVIDER'"><a routerLink="/availability"
-              title="Disponibilités"><fa-icon [icon]="faClipboardList" class="nav-icon"></fa-icon> <span
+          
+          <!-- Role specific: Provider only -->
+          <li *ngIf="authService.getUserRole() === 'PROVIDER'"><a routerLink="/availability" routerLinkActive="active"
+              title="Disponibilités"> <span
                 class="nav-text">Dispos</span></a></li>
-          <li><a routerLink="/chat" title="Messagerie"><fa-icon [icon]="faCommentDots" class="nav-icon"></fa-icon> <span
-                class="nav-text">Messagerie</span></a></li>
+          
+          <!-- Common -->
           <li>
-            <button class="btn btn-outline nav-btn" (click)="logout()" title="Déconnexion"><fa-icon
-                [icon]="faSignOutAlt" class="nav-icon"></fa-icon> <span class="nav-text">Déconnexion</span></button>
+            <a routerLink="/chat" routerLinkActive="active" title="Messagerie">
+              <span class="nav-text">Messagerie</span>
+              <span *ngIf="unreadTotal > 0" class="badge-unread">{{ unreadTotal }}</span>
+            </a>
+          </li>
+          
+          <li>
+            <button class="btn btn-outline nav-btn" (click)="logout()" title="Déconnexion">
+              <span class="nav-text">Quitter</span>
+            </button>
           </li>
         </ng-container>
+
         <ng-template #anonymousTpl>
-          <li><button class="btn btn-primary nav-btn" routerLink="/login" title="Connexion"><fa-icon
-                [icon]="faSignInAlt" class="nav-icon"></fa-icon> <span class="nav-text">Connexion</span></button></li>
+          <li><a routerLink="/providers" routerLinkActive="active" title="Prestataires"> <span
+                class="nav-text">Prestataires</span></a></li>
+          <li><button class="btn btn-primary nav-btn" routerLink="/login" title="Connexion"> <span class="nav-text">Connexion</span></button></li>
         </ng-template>
       </ul>
     </nav>
   </div>
 </header>
 
-<router-outlet></router-outlet>
+<!-- Logout Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showLogoutModal" (click)="cancelLogout()">
+  <div class="modal-card animate-fade-up" (click)="$event.stopPropagation()">
+    <h3>Confirmer la déconnexion</h3>
+    <p>Êtes-vous sûr de vouloir vous déconnecter de votre compte ?</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" (click)="cancelLogout()">Annuler</button>
+      <button class="btn btn-primary" (click)="confirmLogout()">Se déconnecter</button>
+    </div>
+  </div>
+</div>
+
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>
+
 <app-toast></app-toast>
+
+<!-- Bottom Navigation for Mobile/Tablet -->
+<nav class="mobile-nav" *ngIf="authService.isLoggedIn()">
+  <a routerLink="/dashboard" routerLinkActive="active" class="mobile-nav-item">
+    <fa-icon [icon]="faChartLine"></fa-icon>
+    <span>Bord</span>
+  </a>
+  
+  <ng-container *ngIf="authService.getUserRole() === 'CLIENT'">
+    <a routerLink="/providers" routerLinkActive="active" class="mobile-nav-item">
+      <fa-icon [icon]="faTools"></fa-icon>
+      <span>Experts</span>
+    </a>
+  </ng-container>
+
+  <ng-container *ngIf="authService.getUserRole() === 'PROVIDER'">
+    <a routerLink="/availability" routerLinkActive="active" class="mobile-nav-item">
+      <fa-icon [icon]="faCalendarAlt"></fa-icon>
+      <span>Dispos</span>
+    </a>
+  </ng-container>
+
+  <a routerLink="/chat" routerLinkActive="active" class="mobile-nav-item">
+    <div class="icon-container">
+      <fa-icon [icon]="faCommentDots"></fa-icon>
+      <span *ngIf="unreadTotal > 0" class="badge-unread-mobile">{{ unreadTotal }}</span>
+    </div>
+    <span>Messages</span>
+  </a>
+  
+  <a routerLink="/profile" routerLinkActive="active" class="mobile-nav-item">
+    <fa-icon [icon]="faUser"></fa-icon>
+    <span>Profil</span>
+  </a>
+</nav>
+
+<nav class="mobile-nav anonymous" *ngIf="!authService.isLoggedIn()">
+  <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="mobile-nav-item">
+    <fa-icon [icon]="faHome"></fa-icon>
+    <span>Accueil</span>
+  </a>
+  <a routerLink="/providers" routerLinkActive="active" class="mobile-nav-item">
+    <fa-icon [icon]="faTools"></fa-icon>
+    <span>Experts</span>
+  </a>
+  <a routerLink="/login" routerLinkActive="active" class="mobile-nav-item">
+    <fa-icon [icon]="faSignInAlt"></fa-icon>
+    <span>Connexion</span>
+  </a>
+</nav>
 
 <footer class="footer">
   <div class="container">
-    <p>&copy; 2026 AutoFixMG. Tous droits réservés.</p>
+    <div class="footer-logo">AutoFix<span class="highlight">MG</span></div>
+    <p>Votre partenaire de confiance pour l'entretien automobile à Madagascar.</p>
+    <div style="margin-top: 2rem; font-size: 0.9rem; opacity: 0.7;">
+      &copy; 2026 AutoFixMG. Tous droits réservés.
+    </div>
   </div>
-</footer>
+</footer>

@@ -2,16 +2,22 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faUser, faLock, faToolbox, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FontAwesomeModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
 export class ProfileComponent implements OnInit {
   authService = inject(AuthService);
+  faUser = faUser;
+  faLock = faLock;
+  faToolbox = faToolbox;
+  faSpinner = faSpinner;
   
   profileData: any = {
     first_name: '',

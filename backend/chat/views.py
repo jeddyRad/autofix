@@ -20,12 +20,22 @@ class ConversationListView(generics.GenericAPIView):
         for msg in messages:
             partner = msg.receiver if msg.sender == user else msg.sender
             if partner.id not in partners:
+                # Count unread messages from this specific partner
+                unread = Message.objects.filter(sender=partner, receiver=user, is_read=False).count()
                 partners[partner.id] = {
                     'partner': UserSerializer(partner).data,
-                    'last_message': MessageSerializer(msg).data
+                    'last_message': MessageSerializer(msg).data,
+                    'unread_count': unread
                 }
                 
         return Response(list(partners.values()))
+
+class UnreadTotalView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        count = Message.objects.filter(receiver=request.user, is_read=False).count()
+        return Response({'unread_total': count})
 
 class MessageHistoryView(generics.ListAPIView):
     serializer_class = MessageSerializer

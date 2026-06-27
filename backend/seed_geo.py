@@ -72,6 +72,8 @@ def generate():
             latitude=lat,
             longitude=lng,
             specialty=random.choice(specialties),
+            experience_years=random.randint(1, 15),
+            price_rate=random.randint(15000, 80000),
             rating=round(random.uniform(3.0, 5.0), 2)
         )
         

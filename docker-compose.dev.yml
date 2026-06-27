@@ -13,5 +13,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    ports: !reset
+    ports:
       - "4200:4200"
+    command: npx ng serve --host 0.0.0.0 --poll 2000

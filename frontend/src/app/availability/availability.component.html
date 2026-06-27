@@ -1,18 +1,18 @@
 <div class="dashboard-page container">
-    <div class="dashboard-header">
+    <div class="dashboard-header animate-fade-up">
         <div>
-            <h1>Mes Disponibilités</h1>
-            <p class="subtitle">Définissez vos créneaux hebdomadaires récurrents.</p>
+            <h1>Gestion de mes Disponibilités</h1>
+            <p class="subtitle">Organisez votre emploi du temps pour recevoir des demandes pertinentes.</p>
         </div>
     </div>
 
     <!-- Add Form -->
-    <div class="card add-form">
-        <h3>Ajouter un créneau</h3>
+    <div class="card glass-panel add-form animate-fade-up" style="animation-delay: 0.1s;">
+        <h3><fa-icon [icon]="faPlusCircle"></fa-icon> Ajouter un nouveau créneau</h3>
         <div class="form-row">
             <div class="form-group">
                 <label>Jour de la semaine</label>
-                <select [(ngModel)]="newSlot.weekday">
+                <select [(ngModel)]="newSlot.weekday" style="min-width: 180px;">
                     <option *ngFor="let d of WEEKDAYS" [value]="d.value">{{ d.label }}</option>
                 </select>
             </div>
@@ -24,25 +24,45 @@
                 <label>Heure de fin</label>
                 <input type="time" [(ngModel)]="newSlot.end_time">
             </div>
-            <div class="form-group align-end">
-                <button class="btn btn-primary" (click)="addSlot()">+ Ajouter</button>
+            <div class="form-group" style="justify-content: flex-end;">
+                <button class="btn btn-primary shadow-hover" (click)="addSlot()">
+                    {{ isLoading ? '...' : '+ Ajouter au planning' }}
+                </button>
             </div>
         </div>
-        <p *ngIf="errorMessage" class="error-msg">{{ errorMessage }}</p>
+        <p *ngIf="errorMessage" class="error-msg animate-fade-in"><fa-icon [icon]="faExclamationCircle"></fa-icon> {{ errorMessage }}</p>
     </div>
 
     <!-- Weekly Grid -->
     <div *ngIf="isLoading" class="loading-container">
         <div class="spinner"></div>
     </div>
-    <div *ngIf="!isLoading" class="week-grid">
+    
+    <div *ngIf="!isLoading" class="week-grid animate-fade-up" style="animation-delay: 0.2s;">
         <div *ngFor="let day of WEEKDAYS" class="day-column">
             <div class="day-header">{{ day.label }}</div>
-            <div *ngFor="let slot of slotsByDay(day.value)" class="slot-card">
+            <div *ngFor="let slot of slotsByDay(day.value)" class="slot-card animate-fade-in">
                 <span>{{ slot.start_time }} – {{ slot.end_time }}</span>
-                <button class="btn-remove" (click)="deleteSlot(slot.id)">✕</button>
+                <button class="btn-remove" (click)="deleteSlot(slot.id)" title="Supprimer">
+                    <fa-icon [icon]="faTrash"></fa-icon>
+                </button>
             </div>
-            <div *ngIf="slotsByDay(day.value).length === 0" class="no-slot">—</div>
+            <div *ngIf="slotsByDay(day.value).length === 0" class="no-slot">Pas de créneau</div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="modal-overlay" *ngIf="showDeleteModal" (click)="cancelDelete()">
+        <div class="modal-card animate-scale-up" (click)="$event.stopPropagation()">
+            <div class="modal-header warning">
+                <fa-icon [icon]="faTrash" class="modal-icon"></fa-icon>
+                <h2>Supprimer ce créneau ?</h2>
+            </div>
+            <p class="modal-body">Cette action est irréversible. Le créneau sera retiré de votre planning public.</p>
+            <div class="modal-footer">
+                <button class="btn btn-outline" (click)="cancelDelete()">Annuler</button>
+                <button class="btn btn-danger shadow-hover" (click)="confirmDelete()">Confirmer la suppression</button>
+            </div>
         </div>
     </div>
 </div>

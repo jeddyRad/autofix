@@ -1,33 +1,35 @@
 <div class="auth-container">
-  <div class="auth-card">
+  <div class="auth-card card glass-panel animate-fade-up">
     <div class="auth-header">
-      <h2>Créer un compte</h2>
-      <p>Rejoignez la communauté AutoFixMG</p>
+      <h2>Rejoignez AutoFix MG</h2>
+      <p>La plateforme numéro 1 pour l'entretien auto à Madagascar</p>
     </div>
 
     <div *ngIf="errorMessage" class="error-banner">
-      {{ errorMessage }}
+      <fa-icon [icon]="faExclamationTriangle"></fa-icon> {{ errorMessage }}
     </div>
 
+    <!-- OTP Form -->
     <form class="auth-form" (ngSubmit)="verifyOtp()" *ngIf="showOtpForm">
       <div class="form-group">
         <label for="otpCode">Code de validation (reçu par email)</label>
         <input type="text" id="otpCode" name="otpCode" [(ngModel)]="otpCode" placeholder="123456" required>
       </div>
-      <button type="submit" class="btn btn-primary btn-block" [disabled]="isLoading">
-        {{ isLoading ? 'Vérification...' : "Valider l'inscription" }}
+      <button type="submit" class="btn btn-primary btn-block shadow-hover" [disabled]="isLoading">
+        <fa-icon *ngIf="isLoading" [icon]="faSpinner" [spin]="true"></fa-icon>
+        {{ isLoading ? 'Vérification...' : "Valider mon compte" }}
       </button>
-      <div class="resend-otp-container" style="margin-top: 1rem; text-align: center;">
-        <p style="margin-bottom: 0.5rem; font-size: 0.9rem; color: #666;">Vous n'avez pas reçu le code ?</p>
+      <div class="resend-otp-container" style="margin-top: 1.5rem; text-align: center;">
+        <p style="margin-bottom: 0.5rem; font-size: 0.95rem; color: var(--text-muted);">Vous n'avez pas reçu le code ?</p>
         <button type="button" class="btn btn-link" (click)="resendOtp()" [disabled]="isLoading"
-          style="padding: 0; background: none; border: none; color: #0066cc; text-decoration: underline; cursor: pointer;">
-          Renvoyer le code
+          style="font-weight: 700; color: var(--primary); text-decoration: none; cursor: pointer;">
+          Renvoyer un nouveau code
         </button>
       </div>
     </form>
 
+    <!-- Main Registration Form -->
     <form class="auth-form" (ngSubmit)="onSubmit()" *ngIf="!showOtpForm">
-      <!-- Role Selection -->
       <div class="role-selection">
         <label class="role-card" [class.active]="role === 'CLIENT'">
           <input type="radio" name="role" value="CLIENT" [(ngModel)]="role" style="display:none;">
@@ -40,31 +42,30 @@
           <input type="radio" name="role" value="PROVIDER" [(ngModel)]="role" style="display:none;">
           <div class="role-content">
             <span class="icon"><fa-icon [icon]="faWrench"></fa-icon></span>
-            <span>Prestataire</span>
+            <span>Expert / Garage</span>
           </div>
         </label>
       </div>
 
-      <!-- General User Fields -->
       <div class="form-row">
         <div class="form-group">
-          <label for="first_name">Prénom *</label>
-          <input type="text" id="first_name" name="first_name" [(ngModel)]="first_name" placeholder="Jean" required>
+          <label for="first_name">Prénom</label>
+          <input type="text" id="first_name" name="first_name" [(ngModel)]="first_name" placeholder="Ex: Jean" required>
         </div>
         <div class="form-group">
-          <label for="last_name">Nom *</label>
-          <input type="text" id="last_name" name="last_name" [(ngModel)]="last_name" placeholder="Dupont" required>
+          <label for="last_name">Nom</label>
+          <input type="text" id="last_name" name="last_name" [(ngModel)]="last_name" placeholder="Ex: Rakoto" required>
         </div>
       </div>
 
       <div class="form-group">
-        <label for="email">Email *</label>
+        <label for="email">Email</label>
         <input type="email" id="email" name="email" [(ngModel)]="email" placeholder="votre@email.com" required>
       </div>
 
       <div class="form-group">
-        <label for="password">Mot de passe *</label>
-        <input type="password" id="password" name="password" [(ngModel)]="password" placeholder="••••••••" required>
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" [(ngModel)]="password" placeholder="Minimum 8 caractères" required>
       </div>
 
       <div class="form-row">
@@ -73,63 +74,64 @@
           <input type="text" id="phone" name="phone" [(ngModel)]="phone" placeholder="+261 34 ...">
         </div>
         <div class="form-group">
-          <label for="city">Ville</label>
+          <label for="city">Ville de résidence</label>
           <input type="text" id="city" name="city" [(ngModel)]="city" placeholder="Ex: Antananarivo">
         </div>
       </div>
 
-      <!-- Specific Provider Fields (dynamic display) -->
-      <div *ngIf="role === 'PROVIDER'" class="provider-fields">
+      <!-- Specific Provider Fields -->
+      <div *ngIf="role === 'PROVIDER'" class="provider-fields animate-fade-up">
         <hr class="divider">
-        <h3 class="section-subtitle">Détails professionnels</h3>
+        <h3 class="section-subtitle">Informations Professionnelles</h3>
 
         <div class="form-group">
-          <label for="business_name">Nom du commerce / Garage *</label>
+          <label for="business_name">Nom commercial ou Enseigne</label>
           <input type="text" id="business_name" name="business_name" [(ngModel)]="business_name"
-            placeholder="Garage Auto Premium" required>
+            placeholder="Ex: Garage Auto Premium" required>
         </div>
 
         <div class="form-group">
-          <label for="address">Adresse complète *</label>
-          <input type="text" id="address" name="address" [(ngModel)]="address" placeholder="Lot IVB 42, Analakely"
+          <label for="address">Adresse du garage / Atelier</label>
+          <input type="text" id="address" name="address" [(ngModel)]="address" placeholder="Rue, Quartier, Lot..."
             required>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="specialty">Spécialité</label>
-            <select id="specialty" name="specialty" [(ngModel)]="specialty" class="form-control">
+            <label for="specialty">Spécialité principale</label>
+            <select id="specialty" name="specialty" [(ngModel)]="specialty">
               <option value="MECANICIEN">Mécanicien</option>
               <option value="DEPANNAGE">Dépannage / Remorquage</option>
               <option value="GARAGE">Garage complet</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="experience_years">Années d'expérience</label>
+            <label for="experience_years">Expérience (années)</label>
             <input type="number" id="experience_years" name="experience_years" [(ngModel)]="experience_years" min="0">
           </div>
         </div>
 
         <div class="form-group">
-          <label for="price_rate">Tarif moyen estimé (€)</label>
+          <label for="price_rate">Tarif horaire de base (Ariary)</label>
           <input type="number" id="price_rate" name="price_rate" [(ngModel)]="price_rate" min="0">
         </div>
 
         <div class="form-group">
-          <label for="bio">Biographie / Description de vos services</label>
-          <textarea id="bio" name="bio" [(ngModel)]="bio" rows="3"
-            placeholder="Présentez votre entreprise..."></textarea>
+          <label for="bio">Description de vos services & Expertise</label>
+          <textarea id="bio" name="bio" [(ngModel)]="bio" rows="4"
+            placeholder="Décrivez vos compétences, vos outils, spécialités de marques..."></textarea>
         </div>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-block" [disabled]="isLoading">
-        {{ isLoading ? 'Inscription en cours...' : "S'inscrire" }}
+      <button type="submit" class="btn btn-primary btn-block shadow-hover" [disabled]="isLoading">
+        <fa-icon *ngIf="isLoading" [icon]="faSpinner" [spin]="true"></fa-icon>
+        {{ isLoading ? 'Création de votre compte...' : "Confirmer mon inscription" }}
       </button>
     </form>
 
     <div class="auth-footer">
-      <p>Déjà un compte ? <a routerLink="/login">Se connecter</a></p>
-      <a routerLink="/" class="back-link">← Retour à l'accueil</a>
+      <p>Vous avez déjà un compte ? <a routerLink="/login">Connectez-vous</a></p>
+      <a routerLink="/" class="back-link">← Retour au portail</a>
     </div>
   </div>
 </div>

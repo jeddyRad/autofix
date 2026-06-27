@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faCar, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faCar, faWrench, faSpinner, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-register',
@@ -16,6 +16,8 @@ import { faCar, faWrench } from '@fortawesome/free-solid-svg-icons';
 export class RegisterComponent {
   faCar = faCar;
   faWrench = faWrench;
+  faSpinner = faSpinner;
+  faExclamationTriangle = faExclamationTriangle;
   role: 'CLIENT' | 'PROVIDER' = 'CLIENT';
   first_name = '';
   last_name = '';

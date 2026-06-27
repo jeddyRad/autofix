@@ -5,7 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ChatService } from '../services/chat.service';
 import { AuthService } from '../services/auth.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faCommentDots } from '@fortawesome/free-solid-svg-icons';
+import { faCommentDots, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-chat',
@@ -19,6 +19,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
   route = inject(ActivatedRoute);
   faCommentDots = faCommentDots;
+  faPaperPlane = faPaperPlane;
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
 
@@ -81,6 +82,8 @@ export class ChatComponent implements OnInit, OnDestroy {
         if (autoScroll || (isNewMessage && atBottom)) {
           setTimeout(() => this.scrollToBottom(), 100);
         }
+        // Notify that unread count may have decreased
+        this.chatService.triggerUnreadRefresh();
       },
       error: (err: any) => console.error(err)
     });

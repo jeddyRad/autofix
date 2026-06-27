@@ -1,94 +1,136 @@
-<div class="search-page container">
-  <div class="search-header">
-    <h1>Trouvez un Prestataire de Confiance</h1>
-    <p>Recherchez et réservez des mécaniciens, garages et dépanneurs à Madagascar</p>
-  </div>
+<div class="search-container">
+  <!-- Header Minimaliste -->
+  <header class="search-header">
+    <span class="eyebrow">Réseau Autofix Madagascar</span>
+    <h1>Nos Experts à votre Service</h1>
+    <p>Trouvez un mécanicien de confiance ou un dépanneur en quelques clics à travers toute l'île.</p>
+  </header>
 
-  <!-- Filter Section -->
-  <div class="filter-card">
+  <!-- Section Filtres (Style Bento / Grid moderne) -->
+  <section class="filter-bento-box">
     <div class="filter-grid">
-      <div class="filter-group">
-        <label for="search">Rechercher</label>
-        <input type="text" id="search" [(ngModel)]="searchQuery" (ngModelChange)="onFilterChange()"
-          placeholder="Nom, garage, mot-clé...">
+      <!-- Recherche principale -->
+      <div class="filter-group field-search">
+        <label for="search">Que cherchez-vous ?</label>
+        <div class="input-wrapper">
+          <input type="text" id="search" [(ngModel)]="searchQuery" (ngModelChange)="onFilterChange()"
+            placeholder="Nom, garage, expertise...">
+        </div>
       </div>
 
-      <div class="filter-group geo-group">
-        <label>Géolocalisation</label>
-        <button class="btn btn-geo" (click)="geoActive ? clearGeo() : useMyLocation()"
-          [ngClass]="{'active': geoActive}">
+      <!-- Géolocalisation Mobile-First -->
+      <div class="filter-group field-geo">
+        <label>Proximité</label>
+        <button class="btn-modern-geo" [class.is-active]="geoActive" (click)="geoActive ? clearGeo() : useMyLocation()">
           <fa-icon [icon]="isGeoLoading ? faSpinner : faLocationArrow" [spin]="isGeoLoading"></fa-icon>
-          {{ geoActive ? 'Position activée (Effacer)' : 'Utiliser ma position' }}
+          <span>{{ geoActive ? 'Position activée' : 'Autour de moi' }}</span>
         </button>
       </div>
 
-      <div class="filter-group" *ngIf="!geoActive">
-        <label for="city">Ville</label>
-        <select id="city" [(ngModel)]="selectedCity" (change)="onFilterChange()">
-          <option value="">Toutes les villes</option>
-          <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
-        </select>
+      <!-- Ville (Conditionnelle) -->
+      <div class="filter-group field-city" *ngIf="!geoActive">
+        <label for="city">Localisation</label>
+        <div class="select-wrapper">
+          <select id="city" [(ngModel)]="selectedCity" (change)="onFilterChange()">
+            <option value="">Toute l'île</option>
+            <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+          </select>
+        </div>
       </div>
 
-      <div class="filter-group">
+      <!-- Type de Service -->
+      <div class="filter-group field-service">
         <label for="specialty">Spécialité</label>
-        <select id="specialty" [(ngModel)]="selectedSpecialty" (change)="onFilterChange()">
-          <option value="">Toutes les spécialités</option>
-          <option *ngFor="let spec of specialties" [value]="spec.value">{{ spec.label }}</option>
-        </select>
+        <div class="select-wrapper">
+          <select id="specialty" [(ngModel)]="selectedSpecialty" (change)="onFilterChange()">
+            <option value="">Tous les services</option>
+            <option *ngFor="let spec of specialties" [value]="spec.value">{{ spec.label }}</option>
+          </select>
+        </div>
       </div>
     </div>
 
+    <!-- Pied de filtres discret -->
     <div class="filter-actions" *ngIf="searchQuery || selectedCity || selectedSpecialty || geoActive">
-      <button class="btn btn-outline" (click)="resetFilters()">Réinitialiser les filtres</button>
+      <button class="btn btn-outline" (click)="resetFilters()">
+        Effacer tous les filtres
+      </button>
+    </div>
+  </section>
+
+  <!-- Alertes Erreurs Géo Épurées -->
+  <div class="alert alert-error" *ngIf="geoError">
+    <fa-icon [icon]="faExclamationTriangle"></fa-icon>
+    <span>{{ geoError }}</span>
+  </div>
+
+  <!-- Skeletons Loading (Remplacent l'ancien spinner pour éviter les sauts d'écran) -->
+  <div *ngIf="isLoading" class="skeleton-grid">
+    <div class="skeleton-card" *ngFor="let item of [1,2,3]">
+      <div class="skeleton-line header"></div>
+      <div class="skeleton-line title"></div>
+      <div class="skeleton-line body"></div>
+      <div class="skeleton-line button"></div>
     </div>
   </div>
 
-  <!-- Geo Error Message -->
-  <div class="geo-error" *ngIf="geoError">
-    <p>{{ geoError }}</p>
-  </div>
+  <!-- Grille des Prestataires -->
+  <main *ngIf="!isLoading">
+    <div *ngIf="providers.length > 0; else emptyState" class="providers-masonry">
+      <article *ngFor="let provider of providers; let i = index" class="expert-card">
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
-    <div class="spinner"></div>
-    <p>Recherche des professionnels...</p>
-  </div>
-
-  <!-- Providers Grid -->
-  <div *ngIf="!isLoading">
-    <div *ngIf="providers.length > 0; else emptyState" class="provider-grid">
-      <div *ngFor="let provider of providers" class="provider-card">
-        <div class="card-header">
-          <span class="specialty-badge" [ngClass]="provider.provider_profile?.specialty">
-            {{ provider.provider_profile?.specialty === 'GARAGE' ? 'Garage' : (provider.provider_profile?.specialty ===
-            'DEPANNAGE' ? 'Dépannage' : 'Mécanicien') }}
+        <!-- Badge & Note -->
+        <div class="card-top-bar">
+          <span class="badge" [ngClass]="provider.provider_profile?.specialty">
+            {{ getSpecialtyLabel(provider.provider_profile?.specialty) }}
           </span>
-          <div class="rating">
+          <div class="rating-pill" [class.is-new]="!provider.provider_profile?.rating">
             <span class="star">★</span>
-            <span class="rating-value">{{ provider.provider_profile?.rating || '0.0' }}</span>
-          </div>
-          <div class="distance-badge" *ngIf="provider.distance_km != null">
-            <fa-icon [icon]="faLocationArrow"></fa-icon> {{ provider.distance_km | number:'1.0-1' }} km
+            <span class="rating-val">{{ provider.provider_profile?.rating || 'Nouveau' }}</span>
           </div>
         </div>
 
-        <div class="card-body">
-          <h3 class="business-name">{{ provider.provider_profile?.business_name || provider.first_name + ' ' +
-            provider.last_name }}</h3>
-          <p class="provider-name">Par {{ provider.first_name }} {{ provider.last_name }}</p>
-          <p class="location"><span class="icon"><fa-icon [icon]="faMapMarkerAlt"></fa-icon></span> {{ provider.city }}
-            - {{ provider.provider_profile?.address }}</p>
-          <p class="rate"><span class="icon"><fa-icon [icon]="faEuroSign"></fa-icon></span> À partir de <strong>{{
-              provider.provider_profile?.price_rate || 0 }} €</strong></p>
-          <p class="bio">{{ provider.provider_profile?.bio || 'Aucune description disponible.' }}</p>
+        <!-- Contenu de l'expert -->
+        <div class="card-main-content">
+          <h3 class="expert-title">
+            {{ provider.provider_profile?.business_name || (provider.first_name + ' ' + provider.last_name) }}
+          </h3>
+          <p class="expert-subtitle">Par {{ provider.first_name }} {{ provider.last_name }}</p>
+
+          <!-- Zone Localisation -->
+          <div class="meta-row">
+            <div class="meta-icon"><fa-icon [icon]="faMapMarkerAlt"></fa-icon></div>
+            <div class="meta-details">
+              <p class="location-primary">
+                {{ provider.city }}
+                <span class="geo-distance" *ngIf="provider.distance_km != null">
+                  • À {{ provider.distance_km | number:'1.0-1' }} km
+                </span>
+              </p>
+              <p class="location-secondary">{{ provider.provider_profile?.address }}</p>
+            </div>
+          </div>
+
+          <!-- Zone Tarif MGA -->
+          <div class="meta-row price-section">
+            <div class="meta-icon"><fa-icon [icon]="faMoneyBill"></fa-icon></div>
+            <div class="price-details">
+              <span class="price-amount"> {{ (provider.provider_profile?.price_rate ?? 0) | number:'1.0-0' }} Ar</span>
+              <span class="price-unit">/ intervention</span>
+            </div>
+          </div>
+
+          <p class="expert-bio">{{ provider.provider_profile?.bio || 'Ce partenaire n\'a pas encore renseigné sa
+            biographie professionnelle.' }}</p>
         </div>
 
-        <div class="card-footer">
-          <button class="btn btn-primary btn-full" [routerLink]="['/providers', provider.id]">Voir profil &
-            Réserver</button>
+        <!-- Action principale -->
+        <div class="card-action-bar">
+          <button class="btn-action-primary" [routerLink]="['/providers', provider.id]">
+            Prendre rendez-vous
+          </button>
         </div>
-      </div>
+      </article>
     </div>
 
     <!-- Empty State -->
@@ -100,5 +142,7 @@
         <button class="btn btn-primary" (click)="resetFilters()">Réinitialiser les filtres</button>
       </div>
     </ng-template>
-  </div>
+
+
+  </main>
 </div>
