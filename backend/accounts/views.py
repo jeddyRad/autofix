@@ -9,7 +9,7 @@ from .serializers import UserSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.conf import settings
@@ -43,14 +43,15 @@ def _send_otp_email(user, otp):
         ctx = {'first_name': user.first_name, 'otp': otp}
         html_body = render_to_string('emails/verification_code.html', ctx)
         
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
-            html_message=html_body,
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=html_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email]
         )
+        msg.content_subtype = "html"
+        msg.attach_alternative(message, "text/plain")
+        msg.send(fail_silently=False)
     except Exception as exc:
         logger.error('[OTP] Envoi email échoué pour %s : %s', user.email, exc)
 
@@ -281,13 +282,15 @@ class ForgotPasswordView(APIView):
                 f"Cordialement,\n"
                 f"L'équipe AutoFix MG"
             )
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                body=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[user.email]
             )
+            # If the user has a reset_password.html template, we could attach it here.
+            # But plain text works for reset password if no template is provided.
+            msg.send(fail_silently=False)
         except Exception as exc:
             logger.error('[PasswordReset] Envoi email échoué pour %s : %s', user.email, exc)
 

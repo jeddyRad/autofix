@@ -2,7 +2,7 @@ import csv
 import stripe
 import logging
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from rest_framework import viewsets, status, generics, serializers
@@ -26,12 +26,16 @@ def _notify_appointment(subject: str, body: str, *recipients, html_message: str 
     if not emails:
         return
     try:
-        send_mail(
-            subject, body,
-            settings.DEFAULT_FROM_EMAIL, emails,
-            fail_silently=False,
-            html_message=html_message or None,
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=html_message if html_message else body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=emails
         )
+        if html_message:
+            msg.content_subtype = "html"
+            msg.attach_alternative(body, "text/plain")
+        msg.send(fail_silently=False)
     except Exception as exc:
         logger.error('[Notification] Envoi email échoué : %s', exc)
 
